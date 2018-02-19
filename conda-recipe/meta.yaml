@@ -1,0 +1,24 @@
+package:
+    name: csaxs_dia
+    version: 1.0.0
+
+source:
+    path: ..
+
+build:
+    number: 0
+
+requirements:
+    build:
+        - python
+
+    run:
+        - python
+        - detector_integration_api
+
+build:
+  entry_points:
+    - dia_csaxs = csaxs_dia.start_server:main
+
+about:
+    home: https://github.com/paulscherrerinstitute/csaxs_dia
