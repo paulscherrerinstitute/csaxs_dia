@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/paulscherrerinstitute/csaxs_dia.svg?branch=master)](https://travis-ci.org/paulscherrerinstitute/csaxs_dia)
+
 # cSAXS Eiger 9M detector integration
 
 The following README is useful for controlling the Eiger 9M deployment at cSAXS.
