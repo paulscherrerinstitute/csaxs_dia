@@ -1,11 +1,13 @@
 import unittest
 
-from detector_integration_api.deployment.csaxs import csaxs_manager
-from detector_integration_api.deployment.csaxs.csaxs_validation_eiger9m import IntegrationStatus
-from tests.utils import get_test_integration_manager
+from detector_integration_api.tests.utils import get_test_integration_manager
+
+from csaxs_dia.manager import IntegrationStatus
+from csaxs_dia import manager as csaxs_manager
 
 
 class TestCsaxsStateMachine(unittest.TestCase):
+
     def test_state_machine(self):
         manager = get_test_integration_manager(csaxs_manager)
 

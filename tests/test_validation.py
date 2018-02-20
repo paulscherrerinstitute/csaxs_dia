@@ -26,4 +26,9 @@ class TestValidation(unittest.TestCase):
             writer_config["user_id"] = 30000
             validate_writer_config(writer_config)
 
+    def test_additional_fields(self):
+        writer_config = get_valid_config()["writer"]
 
+        with self.assertRaisesRegex(ValueError, "Received unexpected parameters"):
+            writer_config["unexpected"] = "jup"
+            validate_writer_config(writer_config)
