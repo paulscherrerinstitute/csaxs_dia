@@ -15,6 +15,8 @@ class IntegrationStatus(Enum):
     ERROR = "error"
 
 
+E_ACCOUNT_USER_ID_RANGE = [10000, 29999]
+
 MANDATORY_WRITER_CONFIG_PARAMETERS = ["n_frames", "user_id", "output_file"]
 MANDATORY_BACKEND_CONFIG_PARAMETERS = ["bit_depth", "n_frames"]
 MANDATORY_DETECTOR_CONFIG_PARAMETERS = ["period", "frames", "dr", "exptime"]
@@ -114,6 +116,12 @@ def validate_writer_config(configuration):
 
     if wrong_parameter_types:
         raise ValueError("Received parameters of invalid type:\n%s", wrong_parameter_types)
+
+    user_id = configuration["user_id"]
+    if user_id < E_ACCOUNT_USER_ID_RANGE[0] or user_id > E_ACCOUNT_USER_ID_RANGE[1]:
+        raise ValueError("Provided user_id %d outside of specified range [%d-%d]." % (user_id,
+                                                                                      E_ACCOUNT_USER_ID_RANGE[0],
+                                                                                      E_ACCOUNT_USER_ID_RANGE[1]))
 
     # Check if the filename ends with h5.
     if configuration["output_file"][-3:] != ".h5":
