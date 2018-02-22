@@ -472,8 +472,8 @@ It is run using a **systemd** service (/etc/systemd/system/dia.service).
 The services invokes the startup file **/home/dia/start_dia.sh**.
 
 The service can be controlled with the following commands (using sudo or root):
-- **systemctl start dia.service** (start the backend)
-- **systemctl stop dia.service** (stop the backend)
+- **systemctl start dia.service** (start the dia)
+- **systemctl stop dia.service** (stop the dia)
 - **journalctl -u dia.service -f** (check the dia logs)
 
 ### Writer
