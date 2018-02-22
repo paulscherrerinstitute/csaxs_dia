@@ -373,7 +373,7 @@ In addition to this properties, a valid config must also have the parameters nee
 
 #### cSAXS file format config
 
-The following fields are required to write a valid cSAXS formated file. 
+The following fields are required to write a valid cSAXS formatted file. 
 On the right side is the path inside the HDF5 file where the value will be stored.
 
 - *"scan"*: "/entry/title",
