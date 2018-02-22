@@ -38,7 +38,7 @@ You can control the DIA via the Python client or over the REST api directly.
 
 **More documentation about the DIA can be found on its repository** (referenced above).
 
-**Note**: The writer needs a lot of parameters to write the MX file format. You probably do not care about this, so you 
+**Note**: The writer needs a lot of parameters to write the cSAXS file format. You probably do not care about this, so you 
 can use the DEBUG_FORMAT_PARAMETERS parameters for now.
 
 <a id="quick_python"></a>
