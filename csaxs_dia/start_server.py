@@ -14,12 +14,18 @@ from csaxs_dia import manager
 _logger = logging.getLogger(__name__)
 
 
-def start_integration_server(host, port, backend_api_url, backend_stream_url, writer_port):
+def start_integration_server(host, port, backend_api_url, backend_stream_url, writer_port,
+                             writer_executable, writer_log_folder):
     _logger.info("Starting integration REST API with:\nBackend api url: %s\nBackend stream url: %s\nWriter port: %s",
                  backend_api_url, backend_stream_url, writer_port)
 
+    _logger.info("Using writer executable '%s' and writing writer logs to '%s'.", writer_executable, writer_log_folder)
+
     backend_client = BackendClient(backend_api_url)
-    writer_client = CppWriterClient(backend_stream_url, writer_port)
+    writer_client = CppWriterClient(stream_url=backend_stream_url,
+                                    writer_executable=writer_executable,
+                                    writer_port=writer_port,
+                                    log_folder=writer_log_folder)
     detector_client = DetectorClient()
 
     integration_manager = manager.IntegrationManager(writer_client=writer_client,
@@ -49,6 +55,10 @@ def main():
                         help="Backend REST API url.")
     parser.add_argument("-w", "--writer_port", type=int, default=10001,
                         help="Writer REST API port.")
+    parser.add_argument("--writer_executable", type=str, default="/home/dia/start_writer.sh",
+                        help="Executable to start the writer.")
+    parser.add_argument("--writer_log_folder", type=str, default="/var/log/h5_zmq_writer",
+                        help="Log directory for writer logs.")
 
     arguments = parser.parse_args()
 
@@ -58,7 +68,9 @@ def main():
     start_integration_server(arguments.interface, arguments.port,
                              backend_api_url=arguments.backend_url,
                              backend_stream_url=arguments.backend_stream,
-                             writer_port=arguments.writer_port)
+                             writer_port=arguments.writer_port,
+                             writer_executable=arguments.writer_executable,
+                             writer_log_folder=arguments.writer_log_folder)
 
 
 if __name__ == "__main__":
