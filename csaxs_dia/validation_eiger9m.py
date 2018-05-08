@@ -112,6 +112,12 @@ def validate_writer_config(configuration):
     wrong_parameter_types = ""
     for parameter_name, parameter_type in CSAXS_FORMAT_INPUT_PARAMETERS.items():
         if not isinstance(configuration[parameter_name], parameter_type):
+
+            # If the input type is an int, but float is required, convert it.
+            if parameter_type == float and isinstance(configuration[parameter_name], int):
+                configuration[parameter_name] = float(configuration[parameter_name])
+                continue
+
             wrong_parameter_types += "\tWriter parameter '%s' expected of type '%s', but received of type '%s'.\n" % \
                                      (parameter_name, parameter_type, type(configuration[parameter_name]))
 
