@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION=1.0.0
+VERSION=1.1.0
 
 # Build the docker image.
 docker build --no-cache=true -t docker.psi.ch:5000/csaxs_dia .

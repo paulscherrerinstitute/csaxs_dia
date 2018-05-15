@@ -1,6 +1,6 @@
 package:
     name: csaxs_dia
-    version: 1.0.4
+    version: 1.1.0
 
 source:
     path: ..
@@ -14,7 +14,7 @@ requirements:
 
     run:
         - python
-        - detector_integration_api >=1.1.0
+        - detector_integration_api >=1.4.0
 
 build:
   entry_points:
