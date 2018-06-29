@@ -21,75 +21,7 @@ MANDATORY_WRITER_CONFIG_PARAMETERS = ["n_frames", "user_id", "output_file"]
 MANDATORY_BACKEND_CONFIG_PARAMETERS = ["bit_depth", "n_frames"]
 MANDATORY_DETECTOR_CONFIG_PARAMETERS = ["period", "frames", "dr", "exptime"]
 
-CSAXS_FORMAT_INPUT_PARAMETERS = {
-    "sl2wv": float,
-    "sl0ch": float,
-    "sl2wh": float,
-    "temp_mono_cryst_1": float,
-    "harmonic": int,
-    "mokev": float,
-    "sl2cv": float,
-    "bpm4_gain_setting": float,
-    "mirror_coating": str,
-    "samx": float,
-    "sample_name": str,
-    "bpm5y": float,
-    "sl2ch": float,
-    "curr": float,
-    "bs2_status": str,
-    "bs2y": float,
-    "diode": float,
-    "samy": float,
-    "sl4ch": float,
-    "sl4wh": float,
-    "temp_mono_cryst_2": float,
-    "sl3wh": float,
-    "mith": float,
-    "bs1_status": str,
-    "bpm4s": float,
-    "sl0wh": float,
-    "bpm6z": float,
-    "bs1y": float,
-    "scan": str,
-    "bpm5_gain_setting": float,
-    "bpm4z": float,
-    "bpm4x": float,
-    "date": str,
-    "mibd": float,
-    "temp": float,
-    "idgap": float,
-    "sl4cv": float,
-    "sl1wv": float,
-    "sl3wv": float,
-    "sl1ch": float,
-    "bs2x": float,
-    "bpm6_gain_setting": float,
-    "bpm4y": float,
-    "bpm6s": float,
-    "sample_description": str,
-    "bpm5z": float,
-    "moth1": float,
-    "sec": float,
-    "sl3cv": float,
-    "bs1x": float,
-    "bpm6_saturation_value": float,
-    "bpm5s": float,
-    "mobd": float,
-    "sl1wh": float,
-    "sl4wv": float,
-    "bs2_det_dist": float,
-    "bpm5_saturation_value": float,
-    "fil_comb_description": str,
-    "bpm5x": float,
-    "bpm4_saturation_value": float,
-    "bs1_det_dist": float,
-    "sl3ch": float,
-    "bpm6y": float,
-    "sl1cv": float,
-    "bpm6x": float,
-    "ftrans": float,
-    "samz": float
-}
+CSAXS_FORMAT_INPUT_PARAMETERS = {}
 
 
 def validate_writer_config(configuration):
@@ -106,7 +38,6 @@ def validate_writer_config(configuration):
     unexpected_parameters = [x for x in configuration.keys() if x not in writer_cfg_params]
     if unexpected_parameters:
         _logger.warning("Received unexpected parameters for writer: %s" % unexpected_parameters)
-        #raise ValueError("Received unexpected parameters for writer: %s" % unexpected_parameters)
 
     # Check if all format parameters are of correct type.
     wrong_parameter_types = ""

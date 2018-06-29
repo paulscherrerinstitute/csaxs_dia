@@ -32,21 +32,7 @@ class TestReadme(unittest.TestCase):
 
     def test_example(self):
         # Just some mock value for the file format.
-        DEBUG_FORMAT_PARAMETERS = {
-            "sl2wv": 1.0, "sl0ch": 1.0, "sl2wh": 1.0, "temp_mono_cryst_1": 1.0, "harmonic": 1,
-            "mokev": 1.0, "sl2cv": 1.0, "bpm4_gain_setting": 1.0, "mirror_coating": "placeholder text",
-            "samx": 1.0, "sample_name": "placeholder text", "bpm5y": 1.0, "sl2ch": 1.0, "curr": 1.0,
-            "bs2_status": "placeholder text", "bs2y": 1.0, "diode": 1.0, "samy": 1.0, "sl4ch": 1.0,
-            "sl4wh": 1.0, "temp_mono_cryst_2": 1.0, "sl3wh": 1.0, "mith": 1.0, "bs1_status": "placeholder text",
-            "bpm4s": 1.0, "sl0wh": 1.0, "bpm6z": 1.0, "bs1y": 1.0, "scan": "placeholder text", "bpm5_gain_setting": 1.0,
-            "bpm4z": 1.0, "bpm4x": 1.0, "date": "placeholder text", "mibd": 1.0, "temp": 1.0,
-            "idgap": 1.0, "sl4cv": 1.0, "sl1wv": 1.0, "sl3wv": 1.0, "sl1ch": 1.0, "bs2x": 1.0, "bpm6_gain_setting": 1.0,
-            "bpm4y": 1.0, "bpm6s": 1.0, "sample_description": "placeholder text", "bpm5z": 1.0, "moth1": 1.0,
-            "sec": 1.0, "sl3cv": 1.0, "bs1x": 1.0, "bpm6_saturation_value": 1.0, "bpm5s": 1.0, "mobd": 1.0,
-            "sl1wh": 1.0, "sl4wv": 1.0, "bs2_det_dist": 1.0, "bpm5_saturation_value": 1.0,
-            "fil_comb_description": "placeholder text", "bpm5x": 1.0, "bpm4_saturation_value": 1.0, "bs1_det_dist": 1.0,
-            "sl3ch": 1.0, "bpm6y": 1.0, "sl1cv": 1.0, "bpm6x": 1.0, "ftrans": 1.0, "samz": 1.0
-        }
+        DEBUG_FORMAT_PARAMETERS = {}
 
         # Import the client.
         from detector_integration_api import DetectorIntegrationClient
