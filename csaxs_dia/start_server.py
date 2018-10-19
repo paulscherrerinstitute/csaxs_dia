@@ -58,7 +58,7 @@ def main():
                         help="Backend REST API url.")
     parser.add_argument("-w", "--writer_port", type=int, default=10001,
                         help="Writer REST API port.")
-    parser.add_argument("--writer_executable", type=str, default="/home/dia/start_writer.sh",
+    parser.add_argument("--writer_executable", type=str, default="/home/writer/start_writer.sh",
                         help="Executable to start the writer.")
     parser.add_argument("--writer_log_folder", type=str, default="/var/log/h5_zmq_writer",
                         help="Log directory for writer logs.")
