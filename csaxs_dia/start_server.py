@@ -16,6 +16,9 @@ _logger = logging.getLogger(__name__)
 
 def start_integration_server(host, port, backend_api_url, backend_stream_url, writer_port,
                              writer_executable, writer_log_folder):
+
+    _logger.info("DIA rest API endpoint: http://%s:%s" % (host, port))
+
     _logger.info("Starting integration REST API with:\nBackend api url: %s\nBackend stream url: %s\nWriter port: %s",
                  backend_api_url, backend_stream_url, writer_port)
 
