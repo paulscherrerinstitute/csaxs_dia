@@ -51,14 +51,24 @@ class IntegrationManager(object):
         status = self.get_acquisition_status()
 
         if status == IntegrationStatus.RUNNING:
+
             _audit_logger.info("detector_client.stop()")
-            self.detector_client.stop()
+            try:
+                self.detector_client.stop()
+            except Exception as e:
+                _audit_logger.error("Error while trying to stop the detector. %s" % e)
 
             _audit_logger.info("backend_client.close()")
-            self.backend_client.close()
+            try:
+                self.backend_client.close()
+            except Exception as e:
+                _audit_logger.error("Error while trying to stop the backend. %s" % e)
 
             _audit_logger.info("writer_client.stop()")
-            self.writer_client.stop()
+            try:
+                self.writer_client.stop()
+            except Exception as e:
+                _audit_logger.error("Error while trying to stop the writer. %s" % e)
 
         return self.reset()
 
