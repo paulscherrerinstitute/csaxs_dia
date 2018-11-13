@@ -52,7 +52,7 @@ def main():
     parser.add_argument("--log_level", default=config.DEFAULT_LOGGING_LEVEL,
                         choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
                         help="Log level to use.")
-    parser.add_argument("-s", "--backend_stream", default="tcp://tcp://129.129.95.40:40000",
+    parser.add_argument("-s", "--backend_stream", default="tcp://129.129.95.40:40000",
                         help="Output stream address from the backend.")
     parser.add_argument("-b", "--backend_url", default="http://xbl-daq-28:8080",
                         help="Backend REST API url.")
