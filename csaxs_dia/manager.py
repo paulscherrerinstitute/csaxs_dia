@@ -89,16 +89,25 @@ class IntegrationManager(object):
         _audit_logger.info("Getting status details.")
 
         _audit_logger.info("writer_client.get_status()")
-        writer_status = self.writer_client.get_status() \
-            if self.writer_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
+        try:
+            writer_status = self.writer_client.get_status() \
+                if self.writer_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
+        except:
+            writer_status = IntegrationStatus.COMPONENT_NOT_RESPONDING
 
         _audit_logger.info("backend_client.get_status()")
-        backend_status = self.backend_client.get_status() \
-            if self.backend_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
+        try:
+            backend_status = self.backend_client.get_status() \
+                if self.backend_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
+        except:
+            backend_status = IntegrationStatus.COMPONENT_NOT_RESPONDING
 
         _audit_logger.info("detector_client.get_status()")
-        detector_status = self.detector_client.get_status() \
-            if self.detector_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
+        try:
+            detector_status = self.detector_client.get_status() \
+                if self.detector_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
+        except:
+            detector_status = IntegrationStatus.COMPONENT_NOT_RESPONDING
 
         _logger.debug("Detailed status requested:\nWriter: %s\nBackend: %s\nDetector: %s",
                       writer_status, backend_status, detector_status)
@@ -210,13 +219,22 @@ class IntegrationManager(object):
         self.last_config_successful = False
 
         _audit_logger.info("detector_client.stop()")
-        self.detector_client.stop()
+        try:
+            self.detector_client.stop()
+        except Exception as e:
+            _audit_logger.error("Error while trying to reset the detector. %s" % e)
 
         _audit_logger.info("backend_client.reset()")
-        self.backend_client.reset()
+        try:
+            self.backend_client.reset()
+        except Exception as e:
+            _audit_logger.error("Error while trying to reset the backend. %s" % e)
 
         _audit_logger.info("writer_client.reset()")
-        self.writer_client.reset()
+        try:
+            self.writer_client.reset()
+        except Exception as e:
+            _audit_logger.error("Error while trying to reset the writer. %s" % e)
 
         return check_for_target_status(self.get_acquisition_status, IntegrationStatus.INITIALIZED)
 

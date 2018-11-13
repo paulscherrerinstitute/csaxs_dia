@@ -11,8 +11,9 @@ class IntegrationStatus(Enum):
     CONFIGURED = "configured",
     RUNNING = "running",
     DETECTOR_STOPPED = "detector_stopped",
-    FINISHED = "finished"
-    ERROR = "error"
+    FINISHED = "finished",
+    ERROR = "error",
+    COMPONENT_NOT_RESPONDING = "component_not_responding"
 
 
 E_ACCOUNT_USER_ID_RANGE = [10000, 29999]
