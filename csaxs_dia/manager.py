@@ -11,6 +11,17 @@ _logger = getLogger(__name__)
 _audit_logger = getLogger("audit_trail")
 
 
+def try_catch(func, error_message_prefix):
+    def wrapped(*args, **kwargs):
+
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            _audit_logger.error(error_message_prefix, e)
+
+    return wrapped
+
+
 class IntegrationManager(object):
     def __init__(self, backend_client, writer_client, detector_client):
         self.backend_client = ClientDisableWrapper(backend_client)
@@ -53,22 +64,13 @@ class IntegrationManager(object):
         if status == IntegrationStatus.RUNNING:
 
             _audit_logger.info("detector_client.stop()")
-            try:
-                self.detector_client.stop()
-            except Exception as e:
-                _audit_logger.error("Error while trying to stop the detector. %s" % e)
+            try_catch(self.detector_client.stop, "Error while trying to stop the detector.")()
 
             _audit_logger.info("backend_client.close()")
-            try:
-                self.backend_client.close()
-            except Exception as e:
-                _audit_logger.error("Error while trying to stop the backend. %s" % e)
+            try_catch(self.backend_client.close, "Error while trying to stop the backend.")()
 
             _audit_logger.info("writer_client.stop()")
-            try:
-                self.writer_client.stop()
-            except Exception as e:
-                _audit_logger.error("Error while trying to stop the writer. %s" % e)
+            try_catch(self.writer_client.stop, "Error while trying to stop the writer.")()
 
         return self.reset()
 
@@ -219,22 +221,13 @@ class IntegrationManager(object):
         self.last_config_successful = False
 
         _audit_logger.info("detector_client.stop()")
-        try:
-            self.detector_client.stop()
-        except Exception as e:
-            _audit_logger.error("Error while trying to reset the detector. %s" % e)
+        try_catch(self.detector_client.stop, "Error while trying to reset the detector.")()
 
         _audit_logger.info("backend_client.reset()")
-        try:
-            self.backend_client.reset()
-        except Exception as e:
-            _audit_logger.error("Error while trying to reset the backend. %s" % e)
+        try_catch(self.backend_client.reset, "Error while trying to reset the backend.")()
 
         _audit_logger.info("writer_client.reset()")
-        try:
-            self.writer_client.reset()
-        except Exception as e:
-            _audit_logger.error("Error while trying to reset the writer. %s" % e)
+        try_catch(self.writer_client.reset, "Error while trying to reset the writer.")()
 
         return check_for_target_status(self.get_acquisition_status, IntegrationStatus.INITIALIZED)
 
@@ -242,13 +235,13 @@ class IntegrationManager(object):
         _audit_logger.info("Killing acquisition.")
 
         _audit_logger.info("detector_client.stop()")
-        self.detector_client.stop()
+        try_catch(self.detector_client.stop, "Error while trying to kill the detector.")()
 
         _audit_logger.info("backend_client.reset()")
-        self.backend_client.reset()
+        try_catch(self.backend_client.reset, "Error while trying to kill the backend.")()
 
         _audit_logger.info("writer_client.kill()")
-        self.writer_client.kill()
+        try_catch(self.writer_client.kill, "Error while trying to kill the writer.")()
 
         return self.reset()
 
