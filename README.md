@@ -222,11 +222,13 @@ Available and at the same time mandatory backend attributes:
 
 If this is not the case, the configuration will fail.
 
-An example of a valid detector config:
+An example of a valid backend config:
 ```json
 {
   "bit_depth": 16,
-  "n_frames": 1000
+  "n_frames": 1000,
+  "preview_modulo": 10,
+  "preview_offset": 5
 }
 ```
 
