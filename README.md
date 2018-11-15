@@ -66,7 +66,7 @@ client.reset()
 writer_config = {"n_frames": 1000, "user_id": 11057, "output_file": "/gpfs/perf/X12SA/Data10/gac-x12saop/tmp/dia_test.h5"}
 
 # Expect 1000, 16 bit frames.
-backend_config = {"bit_depth": 16, "n_frames": 1000}
+backend_config = {"bit_depth": 16, "n_frames": 1000, "preview_modulo": 10}
 
 # Acquire 1000, 16 bit images with a period of 0.02.
 detector_config = {"dr": 16, "frames": 1000, "period": 0.02, "exptime": 0.0001}
@@ -113,7 +113,7 @@ curl -X POST http://xbl-daq-29:10000/api/v1/reset
 
 # Write 1000 frames, as user id 11057 (gac-x12saop), to file "/gpfs/perf/X12SA/Data10/gac-x12saop/tmp/dia_test.h5".
 curl -X PUT http://xbl-daq-29:10000/api/v1/config -H "Content-Type: application/json" -d '
-{"backend": {"bit_depth": 16, "n_frames": 10},
+{"backend": {"bit_depth": 16, "n_frames": 10, "preview_modulo": 10},
  "detector": {"dr": 16, "exptime": 1, "frames": 10, "period": 0.1, "exptime": 0.001},
  "writer": {
   "n_frames": 10,
@@ -212,6 +212,8 @@ Available and at the same time mandatory backend attributes:
 
 - *"bit_depth"*: Dynamic range - number of bits (16, 32 etc.)
 - *"n_frames"*: Number of frames per acquisition.
+- *"preview_modulo"*: Modulo to use for the stream preview.
+- *"preview_modulo_offset"*: Offset to apply to the frame number before the modulo.
 
 **Warning**: Please note that this 2 attributes must match the information you provided to the detector:
 
