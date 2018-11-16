@@ -214,6 +214,10 @@ Available and at the same time mandatory backend attributes:
 - *"n_frames"*: Number of frames per acquisition.
 - *"preview_modulo"*: Modulo to use for the stream preview.
 - *"preview_modulo_offset"*: Offset to apply to the frame number before the modulo.
+- *"send_every_s"*: Time (in seconds) between frames to be sent to the stream preview.
+
+**Note**: The send_every_s attribute has precedence over the preview_modulo setting. Using both at the same time 
+does not make sense and doing so might result in unexpected behaviour.
 
 **Warning**: Please note that this 2 attributes must match the information you provided to the detector:
 
