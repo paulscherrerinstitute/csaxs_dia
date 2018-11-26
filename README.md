@@ -114,7 +114,7 @@ curl -X POST http://xbl-daq-29:10000/api/v1/reset
 # Write 1000 frames, as user id 11057 (gac-x12saop), to file "/gpfs/perf/X12SA/Data10/gac-x12saop/tmp/dia_test.h5".
 curl -X PUT http://xbl-daq-29:10000/api/v1/config -H "Content-Type: application/json" -d '
 {"backend": {"bit_depth": 16, "n_frames": 10, "preview_modulo": 10},
- "detector": {"dr": 16, "exptime": 1, "frames": 10, "period": 0.1, "exptime": 0.001},
+ "detector": {"dr": 16, "exptime": 1, "frames": 10, "period": 0.1, "exptime": 0.001, "timing":"auto"},
  "writer": {
   "n_frames": 10,
   "output_file": "/gpfs/perf/X12SA/Data10/gac-x12saop/tmp/dia_test.h5",
@@ -268,6 +268,40 @@ To configure the writer, you must specify:
 - *"user_id"*: Under which user to run the writer.
 
 In addition to this properties, a valid config must also have the parameters needed for the cSAXS file format.
+
+## Preview mode
+To put the detector into preview mode, use the following parameters:
+
+```python
+# Import the client.
+from detector_integration_api import DetectorIntegrationClient
+
+# Connect to the Eiger 9M DIA.
+client = DetectorIntegrationClient("http://xbl-daq-29:10000")
+
+# Make sure the status of the DIA is initialized.
+client.reset()
+
+# Write 1000 frames, as user id 11057 (gac-x12saop), to file "/gpfs/perf/X12SA/Data10/gac-x12saop/tmp/dia_test.h5".
+writer_config = {"n_frames": 1000, "user_id": 11057, "output_file": "/gpfs/perf/X12SA/Data10/gac-x12saop/tmp/dia_test.h5"}
+
+# Expect 1000, 16 bit frames.
+backend_config = {"bit_depth": 16, "n_frames": 1000, "preview_modulo": 10}
+
+# Acquire 1000, 16 bit images with a period of 0.02.
+detector_config = {"dr": 16, "frames": 1, "period": 0.02, "exptime": 0.0001, "cycles": 1000, "timing"="trigger"}
+
+configuration = {"writer": writer_config,
+                 "backend": backend_config,
+                 "detector": detector_config}
+
+# Set the configs.
+client.set_config(configuration)
+
+# Start the acquisition.
+client.start()
+
+```
 
 #### cSAXS file format config
 
