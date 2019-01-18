@@ -7,6 +7,7 @@ _logger = getLogger(__name__)
 
 
 class IntegrationStatus(Enum):
+    BACKEND_STOPPED = "backend_stopped",
     INITIALIZED = "initialized",
     CONFIGURED = "configured",
     RUNNING = "running",
@@ -75,6 +76,9 @@ def validate_backend_config(configuration):
         missing_parameters = [x for x in MANDATORY_BACKEND_CONFIG_PARAMETERS if x not in configuration]
         raise ValueError("Backend configuration missing mandatory parameters: %s" % missing_parameters)
 
+    if configuration["n_frames"] != -1:
+        raise ValueError("The only allowed values for backend config n_frames=-1.")
+
 
 def validate_detector_config(configuration):
     if not configuration:
@@ -90,10 +94,6 @@ def validate_configs_dependencies(writer_config, backend_config, detector_config
         raise ValueError("Invalid config. Backend 'bit_depth' set to '%s', but detector 'dr' set to '%s'."
                          " They must be equal."
                          % (backend_config["bit_depth"], detector_config["dr"]))
-
-    if backend_config["n_frames"] != detector_config["frames"]:
-        raise ValueError("Invalid config. Backend 'n_frames' set to '%s', but detector 'frames' set to '%s'. "
-                         "They must be equal." % (backend_config["n_frames"], detector_config["frames"]))
 
     if writer_config["n_frames"] != backend_config["n_frames"]:
         raise ValueError("Invalid config. Backend 'n_frames' set to '%s', but writer 'n_frames' set to '%s'. "
@@ -122,11 +122,13 @@ def interpret_status(statuses):
     # If no other conditions match.
     interpreted_status = IntegrationStatus.ERROR
 
-    # Dia after reset.
-    if cmp(writer, "stopped") and cmp(detector, "idle") and cmp(backend, "INITIALIZED"):
+    if not cmp(backend, "OPEN"):
+        interpreted_status = IntegrationStatus.BACKEND_STOPPED
+
+    elif cmp(writer, "stopped") and cmp(detector, "idle") and cmp(backend, "OPEN"):
         interpreted_status = IntegrationStatus.INITIALIZED
 
-    elif cmp(writer, "stopped") and cmp(detector, "idle") and cmp(backend, "CONFIGURED"):
+    elif cmp(writer, "stopped") and cmp(detector, "idle") and cmp(backend, "OPEN"):
         interpreted_status = IntegrationStatus.CONFIGURED
 
     elif cmp(writer, ("receiving", "writing")) and cmp(detector, ("running", "waiting")) and cmp(backend, "OPEN"):
