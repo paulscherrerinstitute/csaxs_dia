@@ -41,8 +41,8 @@ class IntegrationManager(object):
         if status != IntegrationStatus.CONFIGURED:
             raise ValueError("Cannot start acquisition in %s state. Please configure first." % status)
 
-        _audit_logger.info("backend_client.open()")
-        self.backend_client.open()
+        # _audit_logger.info("backend_client.open()")
+        # self.backend_client.open()
 
         _audit_logger.info("writer_client.start()")
         self.writer_client.start()
@@ -66,8 +66,8 @@ class IntegrationManager(object):
             _audit_logger.info("detector_client.stop()")
             try_catch(self.detector_client.stop, "Error while trying to stop the detector.")()
 
-            _audit_logger.info("backend_client.close()")
-            try_catch(self.backend_client.close, "Error while trying to stop the backend.")()
+            # _audit_logger.info("backend_client.close()")
+            # try_catch(self.backend_client.close, "Error while trying to stop the backend.")()
 
             _audit_logger.info("writer_client.stop()")
             try_catch(self.writer_client.stop, "Error while trying to stop the writer.")()
@@ -155,17 +155,17 @@ class IntegrationManager(object):
         if self.writer_client.client_enabled:
             validation_eiger9m.validate_writer_config(writer_config)
 
-        if self.backend_client.client_enabled:
-            validation_eiger9m.validate_backend_config(backend_config)
+        # if self.backend_client.client_enabled:
+        #     validation_eiger9m.validate_backend_config(backend_config)
 
         if self.detector_client.client_enabled:
             validation_eiger9m.validate_detector_config(detector_config)
 
         validation_eiger9m.validate_configs_dependencies(writer_config, backend_config, detector_config)
 
-        _audit_logger.info("backend_client.set_config(backend_config)")
-        self.backend_client.set_config(backend_config)
-        self._last_set_backend_config = backend_config
+        # _audit_logger.info("backend_client.set_config(backend_config)")
+        # self.backend_client.set_config(backend_config)
+        # self._last_set_backend_config = backend_config
 
         _audit_logger.info("writer_client.set_parameters(writer_config)")
         self.writer_client.set_parameters(writer_config)
@@ -223,8 +223,8 @@ class IntegrationManager(object):
         _audit_logger.info("detector_client.stop()")
         try_catch(self.detector_client.stop, "Error while trying to reset the detector.")()
 
-        _audit_logger.info("backend_client.reset()")
-        try_catch(self.backend_client.reset, "Error while trying to reset the backend.")()
+        # _audit_logger.info("backend_client.reset()")
+        # try_catch(self.backend_client.reset, "Error while trying to reset the backend.")()
 
         _audit_logger.info("writer_client.reset()")
         try_catch(self.writer_client.reset, "Error while trying to reset the writer.")()
@@ -237,8 +237,8 @@ class IntegrationManager(object):
         _audit_logger.info("detector_client.stop()")
         try_catch(self.detector_client.stop, "Error while trying to kill the detector.")()
 
-        _audit_logger.info("backend_client.reset()")
-        try_catch(self.backend_client.reset, "Error while trying to kill the backend.")()
+        # _audit_logger.info("backend_client.reset()")
+        # try_catch(self.backend_client.reset, "Error while trying to kill the backend.")()
 
         _audit_logger.info("writer_client.kill()")
         try_catch(self.writer_client.kill, "Error while trying to kill the writer.")()
