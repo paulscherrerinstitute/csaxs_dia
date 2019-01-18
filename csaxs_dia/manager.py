@@ -75,7 +75,7 @@ class IntegrationManager(object):
         return self.reset()
 
     def get_acquisition_status(self):
-        status = validation_eiger9m.interpret_status(self.get_status_details())
+        status = validation_eiger9m.interpret_status(self.get_status_details(), self.last_config_successful)
 
         # There is no way of knowing if the detector is configured as the user desired.
         # We have a flag to check if the user config was passed on to the detector.

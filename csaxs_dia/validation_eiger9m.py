@@ -100,7 +100,7 @@ def validate_configs_dependencies(writer_config, backend_config, detector_config
                          "They must be equal." % (backend_config["n_frames"], writer_config["n_frames"]))
 
 
-def interpret_status(statuses):
+def interpret_status(statuses, configured):
     _logger.debug("Interpreting statuses: %s", statuses)
 
     writer = statuses["writer"]
@@ -125,10 +125,10 @@ def interpret_status(statuses):
     if not cmp(backend, "OPEN"):
         interpreted_status = IntegrationStatus.BACKEND_STOPPED
 
-    elif cmp(writer, "stopped") and cmp(detector, "idle") and cmp(backend, "OPEN"):
+    elif cmp(writer, "stopped") and cmp(detector, "idle") and cmp(backend, "OPEN") and not configured:
         interpreted_status = IntegrationStatus.INITIALIZED
 
-    elif cmp(writer, "stopped") and cmp(detector, "idle") and cmp(backend, "OPEN"):
+    elif cmp(writer, "stopped") and cmp(detector, "idle") and cmp(backend, "OPEN") and configured:
         interpreted_status = IntegrationStatus.CONFIGURED
 
     elif cmp(writer, ("receiving", "writing")) and cmp(detector, ("running", "waiting")) and cmp(backend, "OPEN"):
