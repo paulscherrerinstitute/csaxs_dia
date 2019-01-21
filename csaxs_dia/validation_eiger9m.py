@@ -7,12 +7,9 @@ _logger = getLogger(__name__)
 
 
 class IntegrationStatus(Enum):
-    BACKEND_STOPPED = "backend_stopped",
     INITIALIZED = "initialized",
-    CONFIGURED = "configured",
+    READY = "ready",
     RUNNING = "running",
-    DETECTOR_STOPPED = "detector_stopped",
-    FINISHED = "finished",
     ERROR = "error",
     COMPONENT_NOT_RESPONDING = "component_not_responding"
 
@@ -20,8 +17,8 @@ class IntegrationStatus(Enum):
 E_ACCOUNT_USER_ID_RANGE = [10000, 29999]
 
 MANDATORY_WRITER_CONFIG_PARAMETERS = ["n_frames", "user_id", "output_file"]
-MANDATORY_BACKEND_CONFIG_PARAMETERS = ["bit_depth", "n_frames"]
-MANDATORY_DETECTOR_CONFIG_PARAMETERS = ["period", "frames", "dr", "exptime"]
+MANDATORY_BACKEND_CONFIG_PARAMETERS = ["bit_depth"]
+MANDATORY_DETECTOR_CONFIG_PARAMETERS = ["period", "frames", "dr", "exptime", "timing"]
 
 CSAXS_FORMAT_INPUT_PARAMETERS = {}
 
@@ -76,7 +73,7 @@ def validate_backend_config(configuration):
         missing_parameters = [x for x in MANDATORY_BACKEND_CONFIG_PARAMETERS if x not in configuration]
         raise ValueError("Backend configuration missing mandatory parameters: %s" % missing_parameters)
 
-    if configuration["n_frames"] != -1:
+    if configuration.get("n_frames", -1) != -1:
         raise ValueError("The only allowed values for backend config n_frames=-1.")
 
 
@@ -95,13 +92,9 @@ def validate_configs_dependencies(writer_config, backend_config, detector_config
                          " They must be equal."
                          % (backend_config["bit_depth"], detector_config["dr"]))
 
-    if writer_config["n_frames"] != backend_config["n_frames"]:
-        raise ValueError("Invalid config. Backend 'n_frames' set to '%s', but writer 'n_frames' set to '%s'. "
-                         "They must be equal." % (backend_config["n_frames"], writer_config["n_frames"]))
-
 
 def interpret_status(statuses, configured):
-    _logger.debug("Interpreting statuses: %s", statuses)
+    _logger.debug("Interpreting statuses: %s with configured flag: %s", statuses, configured)
 
     writer = statuses["writer"]
     backend = statuses["backend"]
@@ -122,24 +115,13 @@ def interpret_status(statuses, configured):
     # If no other conditions match.
     interpreted_status = IntegrationStatus.ERROR
 
-    if not cmp(backend, "OPEN"):
-        interpreted_status = IntegrationStatus.BACKEND_STOPPED
-
-    elif cmp(writer, "stopped") and cmp(detector, "idle") and cmp(backend, "OPEN") and not configured:
+    if cmp(writer, "stopped") and cmp(detector, "idle") and not configured:
         interpreted_status = IntegrationStatus.INITIALIZED
 
-    elif cmp(writer, "stopped") and cmp(detector, "idle") and cmp(backend, "OPEN") and configured:
-        interpreted_status = IntegrationStatus.CONFIGURED
+    elif cmp(writer, "stopped") and cmp(detector, ("idle", "waiting")) and cmp(backend, "OPEN") and configured:
+        interpreted_status = IntegrationStatus.READY
 
-    elif cmp(writer, ("receiving", "writing")) and cmp(detector, ("running", "waiting")) and cmp(backend, "OPEN"):
+    elif cmp(writer, ("receiving", "writing")) and cmp(backend, "OPEN") and configured:
         interpreted_status = IntegrationStatus.RUNNING
-
-    elif cmp(writer, ("receiving", "writing")) and cmp(detector, "idle") and cmp(backend, "OPEN"):
-        interpreted_status = IntegrationStatus.DETECTOR_STOPPED
-
-    elif cmp(writer, ("finished", "stopped")) and cmp(detector, "idle") and cmp(backend, "OPEN"):
-        interpreted_status = IntegrationStatus.FINISHED
-
-    _logger.debug("Statuses interpreted as '%s'.", interpreted_status)
 
     return interpreted_status

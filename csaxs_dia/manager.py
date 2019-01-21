@@ -38,7 +38,7 @@ class IntegrationManager(object):
         _audit_logger.info("Starting acquisition.")
 
         status = self.get_acquisition_status()
-        if status != IntegrationStatus.CONFIGURED:
+        if status != IntegrationStatus.READY:
             raise ValueError("Cannot start acquisition in %s state. Please configure first." % status)
 
         # _audit_logger.info("backend_client.open()")
@@ -79,7 +79,7 @@ class IntegrationManager(object):
 
         # There is no way of knowing if the detector is configured as the user desired.
         # We have a flag to check if the user config was passed on to the detector.
-        if status == IntegrationStatus.CONFIGURED and self.last_config_successful is False:
+        if status == IntegrationStatus.READY and self.last_config_successful is False:
             return IntegrationStatus.ERROR
 
         return status
@@ -137,11 +137,11 @@ class IntegrationManager(object):
 
         self.last_config_successful = False
 
-        if status not in (IntegrationStatus.INITIALIZED, IntegrationStatus.CONFIGURED):
+        if status not in (IntegrationStatus.INITIALIZED, IntegrationStatus.READY):
             raise ValueError("Cannot set config in %s state. Please reset first." % status)
 
         # The backend is configurable only in the INITIALIZED state.
-        if status == IntegrationStatus.CONFIGURED:
+        if status == IntegrationStatus.READY:
             _logger.debug("Integration status is %s. Resetting before applying config.", status)
             self.reset()
 
@@ -177,7 +177,7 @@ class IntegrationManager(object):
 
         self.last_config_successful = True
 
-        return check_for_target_status(self.get_acquisition_status, IntegrationStatus.CONFIGURED)
+        return check_for_target_status(self.get_acquisition_status, IntegrationStatus.READY)
 
     def update_acquisition_config(self, config_updates):
         current_config = self.get_acquisition_config()
@@ -194,7 +194,7 @@ class IntegrationManager(object):
 
         self.set_acquisition_config(current_config)
 
-        return check_for_target_status(self.get_acquisition_status, IntegrationStatus.CONFIGURED)
+        return check_for_target_status(self.get_acquisition_status, IntegrationStatus.READY)
 
     def set_clients_enabled(self, client_status):
 
