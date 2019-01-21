@@ -147,7 +147,7 @@ class IntegrationManager(object):
             _logger.info("Backend configuration changed. Restarting and applying config %s.", backend_config)
 
             _audit_logger.info("backend_client.close()")
-            self.backend_client.close()
+            self.backend_client.reset()
 
             _audit_logger.info("backend_client.set_config(backend_config)")
             self.backend_client.set_config(backend_config)
