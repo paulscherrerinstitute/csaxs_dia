@@ -142,7 +142,8 @@ class IntegrationManager(object):
 
         validation_eiger9m.validate_configs_dependencies(writer_config, backend_config, detector_config)
 
-        if last_config_successful and self._last_set_backend_config != backend_config:
+        if not last_config_successful or \
+                (last_config_successful and self._last_set_backend_config != backend_config):
 
             _logger.info("Backend configuration changed. Restarting and applying config %s.", backend_config)
 
@@ -161,7 +162,8 @@ class IntegrationManager(object):
         self.writer_client.set_parameters(writer_config)
         self._last_set_writer_config = writer_config
 
-        if last_config_successful and self._last_set_detector_config != detector_config:
+        if not last_config_successful or \
+                (last_config_successful and self._last_set_detector_config != detector_config):
 
             _logger.info("Detector configuration changed. Applying config %s.", detector_config)
 
