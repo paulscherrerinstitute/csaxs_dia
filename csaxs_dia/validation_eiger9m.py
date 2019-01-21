@@ -118,7 +118,7 @@ def interpret_status(statuses, configured):
     if cmp(writer, "stopped") and cmp(detector, "idle") and not configured:
         interpreted_status = IntegrationStatus.INITIALIZED
 
-    elif cmp(writer, "stopped") and cmp(detector, ("idle", "waiting")) and cmp(backend, "OPEN") and configured:
+    elif cmp(writer, "stopped") and cmp(detector, "idle") and cmp(backend, "OPEN") and configured:
         interpreted_status = IntegrationStatus.READY
 
     elif cmp(writer, ("receiving", "writing")) and cmp(backend, "OPEN") and configured:
