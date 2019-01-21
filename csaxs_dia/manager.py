@@ -47,11 +47,9 @@ class IntegrationManager(object):
         _audit_logger.info("detector_client.start()")
         self.detector_client.start()
 
-        # We need the status FINISHED for very short acquisitions.
+        # We need the status READY for very short acquisitions.
         return check_for_target_status(self.get_acquisition_status,
-                                       (IntegrationStatus.RUNNING,
-                                        IntegrationStatus.DETECTOR_STOPPED,
-                                        IntegrationStatus.FINISHED))
+                                       (IntegrationStatus.RUNNING, IntegrationStatus.READY))
 
     def stop_acquisition(self):
         _audit_logger.info("Stopping acquisition.")
