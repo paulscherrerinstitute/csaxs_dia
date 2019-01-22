@@ -10,7 +10,8 @@ from detector_integration_api.rest_api.rest_server import register_rest_interfac
 from detector_integration_api.utils import ClientDisableWrapper
 
 from csaxs_dia import manager
-from detector_integration_api.client.detector_cli_client import DetectorClient
+
+from csaxs_dia.detector_client import EigerClientWrapper
 from csaxs_dia.status_provider import StatusProvider
 
 _logger = logging.getLogger(__name__)
@@ -31,7 +32,7 @@ def start_integration_server(host, port, backend_api_url, backend_stream_url, wr
                                     writer_executable=writer_executable,
                                     writer_port=writer_port,
                                     log_folder=writer_log_folder)
-    detector_client = DetectorClient()
+    detector_client = EigerClientWrapper()
 
     backend_client = ClientDisableWrapper(backend_client)
     writer_client = ClientDisableWrapper(writer_client)
