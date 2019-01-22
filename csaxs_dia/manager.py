@@ -35,7 +35,11 @@ class IntegrationManager(object):
 
         self.last_config_successful = False
 
-    def start_acquisition(self, *args, **kwargs):
+    def start_acquisition(self, configuration):
+
+        if configuration:
+            self.set_acquisition_config(configuration)
+
         _audit_logger.info("Starting acquisition.")
 
         status = self.get_cached_acquisition_status(IntegrationStatus.READY)
