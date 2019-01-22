@@ -38,7 +38,7 @@ class IntegrationManager(object):
     def start_acquisition(self, *args, **kwargs):
         _audit_logger.info("Starting acquisition.")
 
-        status = self.get_cached_acquisition_status()
+        status = self.get_cached_acquisition_status(IntegrationStatus.READY)
         if status != IntegrationStatus.READY:
             raise ValueError("Cannot start acquisition in %s state." % status)
 
@@ -55,7 +55,7 @@ class IntegrationManager(object):
     def stop_acquisition(self):
         _audit_logger.info("Stopping acquisition.")
 
-        status = self.get_cached_acquisition_status()
+        status = self.get_cached_acquisition_status(IntegrationStatus.RUNNING)
 
         if status == IntegrationStatus.RUNNING:
 
@@ -72,9 +72,17 @@ class IntegrationManager(object):
                                                      self.last_config_successful)
         return status
 
-    def get_cached_acquisition_status(self):
+    def get_cached_acquisition_status(self, target_status):
         status = validation_eiger9m.interpret_status(self.status_provider.get_cached_status_details(),
                                                      self.last_config_successful)
+
+        if not isinstance(target_status, (tuple, list)):
+            target_status = (target_status,)
+
+        if status not in target_status:
+            _logger.info("Cached status not as expected. Doing real query.")
+            return self.get_acquisition_status()
+
         return status
 
     def get_acquisition_status_string(self):
@@ -92,7 +100,7 @@ class IntegrationManager(object):
         backend_config = new_config.get("backend", {})
         detector_config = new_config.get("detector", {})
 
-        status = self.get_cached_acquisition_status()
+        status = self.get_cached_acquisition_status((IntegrationStatus.INITIALIZED, IntegrationStatus.READY))
 
         last_config_successful = self.last_config_successful
         self.last_config_successful = False
