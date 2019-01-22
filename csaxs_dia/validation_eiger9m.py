@@ -80,7 +80,7 @@ def validate_detector_config(configuration):
     if not configuration:
         raise ValueError("Detector configuration cannot be empty.")
 
-    #TODO: Move to n_frames with new detector client.
+    # TODO: Move to n_frames with new detector client.
     if "n_frames" in configuration:
         configuration['frames'] = configuration["n_frames"]
         del configuration["n_frames"]
@@ -90,7 +90,6 @@ def validate_detector_config(configuration):
         missing_parameters = [x for x in MANDATORY_DETECTOR_CONFIG_PARAMETERS if x not in configuration]
         raise ValueError("Detector configuration missing mandatory parameters: %s" % missing_parameters)
 
-    
 
 def validate_configs_dependencies(writer_config, backend_config, detector_config):
     if backend_config["bit_depth"] != detector_config["dr"]:
@@ -98,7 +97,7 @@ def validate_configs_dependencies(writer_config, backend_config, detector_config
                          " They must be equal."
                          % (backend_config["bit_depth"], detector_config["dr"]))
 
-    #TODO: Move to n_frames with new detector client.
+    # TODO: Move to n_frames with new detector client.
     if detector_config["frames"] != writer_config["n_frames"]:
         raise ValueError("Invalid config. Detector 'n_frames' set to '%s', but writer 'n_frames' set to '%s'."
                          " They must be equal."
@@ -109,8 +108,6 @@ def interpret_status(statuses):
     _logger.debug("Interpreting statuses: %s", statuses)
 
     writer = statuses["writer"]
-    backend = statuses["backend"]
-    detector = statuses["detector"]
 
     def cmp(status, expected_value):
 
