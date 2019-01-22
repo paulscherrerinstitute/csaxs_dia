@@ -30,6 +30,7 @@ class CachedStatusProvider(object):
         try:
             backend_status = self.backend_client.get_status() \
                 if self.backend_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
+            self._last_backend_status = backend_status
         except:
             backend_status = IntegrationStatus.COMPONENT_NOT_RESPONDING.value
 
