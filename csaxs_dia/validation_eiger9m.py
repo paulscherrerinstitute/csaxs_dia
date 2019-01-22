@@ -105,8 +105,8 @@ def validate_configs_dependencies(writer_config, backend_config, detector_config
                          % (detector_config["n_frames"], writer_config["n_frames"]))
 
 
-def interpret_status(statuses, configured):
-    _logger.debug("Interpreting statuses: %s with configured flag: %s", statuses, configured)
+def interpret_status(statuses):
+    _logger.debug("Interpreting statuses: %s", statuses)
 
     writer = statuses["writer"]
     backend = statuses["backend"]

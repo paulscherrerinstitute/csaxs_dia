@@ -1,11 +1,11 @@
 from copy import copy
 from logging import getLogger
+from time import time
 
 from detector_integration_api.utils import check_for_target_status
-
 from csaxs_dia import validation_eiger9m
 from csaxs_dia.validation_eiger9m import IntegrationStatus
-
+from csaxs_dia.detector_client import EigerClientWrapper
 
 _logger = getLogger(__name__)
 _audit_logger = getLogger("audit_trail")
@@ -35,22 +35,27 @@ class IntegrationManager(object):
 
         self.last_config_successful = False
 
-    def start_acquisition(self, configuration):
+        self.eiger = EigerClientWrapper()
 
-        if configuration:
-            self.set_acquisition_config(configuration)
+    def start_acquisition(self, configuration):
 
         _audit_logger.info("Starting acquisition.")
 
-        status = self.get_cached_acquisition_status(IntegrationStatus.READY)
+        status = self.get_acquisition_status(IntegrationStatus.READY)
+ 
         if status != IntegrationStatus.READY:
             raise ValueError("Cannot start acquisition in %s state." % status)
 
-        _audit_logger.info("writer_client.start()")
+        _audit_logger.info("[%d ms] self._set_acquisition_config()" % (int(round(time() * 1000))-start_time))
+        self._set_acquisition_config(configuration, start_time)
+
+        _audit_logger.info("[%d ms] writer_client.start()" % (int(round(time() * 1000))-start_time))
         self.writer_client.start()
 
-        _audit_logger.info("detector_client.start()")
-        self.detector_client.start()
+        _audit_logger.info("[%d ms] self.eiger.start()" % (int(round(time() * 1000))-start_time))
+        self.eiger.start()
+
+        _audit_logger.info("[%d ms] Acquisition started." % (int(round(time() * 1000))-start_time))
 
         # We need the status READY for very short acquisitions.
         return check_for_target_status(self.get_acquisition_status,
@@ -72,20 +77,24 @@ class IntegrationManager(object):
         return check_for_target_status(self.get_acquisition_status, IntegrationStatus.READY)
 
     def get_acquisition_status(self):
-        status = validation_eiger9m.interpret_status(self.status_provider.get_status_details(),
-                                                     self.last_config_successful)
+
+        status = validation_eiger9m.interpret_status(self.status_provider.get_status_details())
         return status
 
-    def get_cached_acquisition_status(self, target_status):
-        status = validation_eiger9m.interpret_status(self.status_provider.get_cached_status_details(),
+    def get_cached_acquisition_status(self, target_status, start_time=None):
+
+        if not start_time:
+            start_time = int(round(time() * 1000))
+
+        status = validation_eiger9m.interpret_status(self.status_provider.get_cached_status_details(start_time),
                                                      self.last_config_successful)
 
         if not isinstance(target_status, (tuple, list)):
             target_status = (target_status,)
 
         if status not in target_status:
-            _logger.info("Cached status not as expected. Doing real query.")
-            return self.get_acquisition_status()
+            _logger.info("Cached status %s not as expected %s. Doing real query." % (status, target_status))
+            return self.get_acquisition_status(start_time)
 
         return status
 
@@ -101,19 +110,14 @@ class IntegrationManager(object):
                 "backend": copy(self._last_set_backend_config),
                 "detector": copy(self._last_set_detector_config)}
 
-    def set_acquisition_config(self, new_config):
+    def _set_acquisition_config(self, new_config, start_time):
 
         writer_config = new_config.get("writer", {})
         backend_config = new_config.get("backend", {})
         detector_config = new_config.get("detector", {})
 
-        status = self.get_cached_acquisition_status((IntegrationStatus.INITIALIZED, IntegrationStatus.READY))
-
         last_config_successful = self.last_config_successful
         self.last_config_successful = False
-
-        if status not in (IntegrationStatus.INITIALIZED, IntegrationStatus.READY):
-            raise ValueError("Cannot set config in %s state. Please stop or reset first." % status)
 
         _audit_logger.info("Set acquisition configuration:\n"
                            "Writer config: %s\n"
@@ -138,18 +142,20 @@ class IntegrationManager(object):
 
             _logger.info("Backend configuration changed. Restarting and applying config %s.", backend_config)
 
-            _audit_logger.info("backend_client.close()")
+            _audit_logger.info("[%d ms] backend_client.close()" % (int(round(time() * 1000))-start_time))
             self.backend_client.reset()
 
-            _audit_logger.info("backend_client.set_config(backend_config)")
+            _audit_logger.info("[%d ms] backend_client.set_config(backend_config)" % (int(round(time() * 1000))-start_time))
             self.backend_client.set_config(backend_config)
 
-            _audit_logger.info("backend_client.open()")
+            _audit_logger.info("[%d ms] backend_client.open()" % (int(round(time() * 1000))-start_time))
             self.backend_client.open()
 
             self._last_set_backend_config = backend_config
+        else:
+            _logger.info("Backend config did not change. Skipping.")
 
-        _audit_logger.info("writer_client.set_parameters(writer_config)")
+        _audit_logger.info("[%d ms] writer_client.set_parameters(writer_config)" % (int(round(time() * 1000))-start_time))
         self.writer_client.set_parameters(writer_config)
         self._last_set_writer_config = writer_config
 
@@ -158,14 +164,18 @@ class IntegrationManager(object):
 
             _logger.info("Detector configuration changed. Applying config %s.", detector_config)
 
-            _audit_logger.info("detector_client.set_config(detector_config)")
+            _audit_logger.info("[%d ms] detector_client.set_config(detector_config)" % (int(round(time() * 1000))-start_time))
             self.detector_client.set_config(detector_config)
 
             self._last_set_detector_config = detector_config
+        else:
+            _logger.info("Detector config did not change. Skipping.")
+
+
+        _audit_logger.info("[%d ms] set_acquisition_config completed" % (int(round(time() * 1000))-start_time))
 
         self.last_config_successful = True
-
-        return check_for_target_status(self.get_acquisition_status, IntegrationStatus.READY)
+	
 
     def update_acquisition_config(self, config_updates):
         current_config = self.get_acquisition_config()
