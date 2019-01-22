@@ -18,7 +18,7 @@ E_ACCOUNT_USER_ID_RANGE = [10000, 29999]
 
 MANDATORY_WRITER_CONFIG_PARAMETERS = ["n_frames", "user_id", "output_file"]
 MANDATORY_BACKEND_CONFIG_PARAMETERS = ["bit_depth"]
-MANDATORY_DETECTOR_CONFIG_PARAMETERS = ["period", "frames", "dr", "exptime", "timing"]
+MANDATORY_DETECTOR_CONFIG_PARAMETERS = ["period", "n_frames", "dr", "exptime", "timing"]
 
 CSAXS_FORMAT_INPUT_PARAMETERS = {}
 
