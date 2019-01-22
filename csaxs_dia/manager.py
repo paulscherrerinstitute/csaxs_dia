@@ -1,7 +1,7 @@
 from copy import copy
 from logging import getLogger
 
-from detector_integration_api.utils import ClientDisableWrapper, check_for_target_status
+from detector_integration_api.utils import check_for_target_status
 
 from csaxs_dia import validation_eiger9m
 from csaxs_dia.validation_eiger9m import IntegrationStatus
@@ -23,10 +23,11 @@ def try_catch(func, error_message_prefix):
 
 
 class IntegrationManager(object):
-    def __init__(self, backend_client, writer_client, detector_client):
-        self.backend_client = ClientDisableWrapper(backend_client)
-        self.writer_client = ClientDisableWrapper(writer_client)
-        self.detector_client = ClientDisableWrapper(detector_client)
+    def __init__(self, backend_client, writer_client, detector_client, status_provider):
+        self.backend_client = backend_client
+        self.writer_client = writer_client
+        self.detector_client = detector_client
+        self.status_provider = status_provider
 
         self._last_set_backend_config = {}
         self._last_set_writer_config = {}
@@ -67,42 +68,12 @@ class IntegrationManager(object):
         return check_for_target_status(self.get_acquisition_status, IntegrationStatus.READY)
 
     def get_acquisition_status(self):
-        status = validation_eiger9m.interpret_status(self.get_status_details(), self.last_config_successful)
+        status = validation_eiger9m.interpret_status(self.status_provider.get_status_details(),
+                                                     self.last_config_successful)
         return status
 
     def get_acquisition_status_string(self):
         return str(self.get_acquisition_status())
-
-    def get_status_details(self):
-        _audit_logger.info("Getting status details.")
-
-        _audit_logger.info("writer_client.get_status()")
-        try:
-            writer_status = self.writer_client.get_status() \
-                if self.writer_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
-        except:
-            writer_status = IntegrationStatus.COMPONENT_NOT_RESPONDING.value
-
-        _audit_logger.info("backend_client.get_status()")
-        try:
-            backend_status = self.backend_client.get_status() \
-                if self.backend_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
-        except:
-            backend_status = IntegrationStatus.COMPONENT_NOT_RESPONDING.value
-
-        _audit_logger.info("detector_client.get_status()")
-        try:
-            detector_status = self.detector_client.get_status() \
-                if self.detector_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
-        except:
-            detector_status = IntegrationStatus.COMPONENT_NOT_RESPONDING.value
-
-        _logger.debug("Detailed status requested:\nWriter: %s\nBackend: %s\nDetector: %s",
-                      writer_status, backend_status, detector_status)
-
-        return {"writer": writer_status,
-                "backend": backend_status,
-                "detector": detector_status}
 
     def get_acquisition_config(self):
         # Always return a copy - we do not want this to be updated.

@@ -8,8 +8,10 @@ from detector_integration_api.client.backend_rest_client import BackendClient
 from detector_integration_api.client.cpp_writer_client import CppWriterClient
 from detector_integration_api.client.detector_cli_client import DetectorClient
 from detector_integration_api.rest_api.rest_server import register_rest_interface
+from detector_integration_api.utils import ClientDisableWrapper
 
 from csaxs_dia import manager
+from csaxs_dia.status_provider import CachedStatusProvider
 
 _logger = logging.getLogger(__name__)
 
@@ -31,9 +33,16 @@ def start_integration_server(host, port, backend_api_url, backend_stream_url, wr
                                     log_folder=writer_log_folder)
     detector_client = DetectorClient()
 
+    backend_client = ClientDisableWrapper(backend_client)
+    writer_client = ClientDisableWrapper(writer_client)
+    detector_client = ClientDisableWrapper(detector_client)
+
+    status_provider = CachedStatusProvider(backend_client, writer_client, detector_client)
+
     integration_manager = manager.IntegrationManager(writer_client=writer_client,
                                                      backend_client=backend_client,
-                                                     detector_client=detector_client)
+                                                     detector_client=detector_client,
+                                                     status_provider=status_provider)
 
     app = bottle.Bottle()
     register_rest_interface(app=app, integration_manager=integration_manager)
