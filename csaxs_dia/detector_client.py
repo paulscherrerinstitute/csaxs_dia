@@ -1,20 +1,20 @@
 from sls_detector import Eiger
 
 
-class DetectorClientWrapper(object):
+class EigerClientWrapper(object):
     def __init__(self):
         self.detector = Eiger()
 
     def start(self):
-        self.eiger.start_detector()
+        self.detector.start_detector()
 
     def stop(self):
-        self.eiger.stop_detector()
+        self.detector.stop_detector()
 
     def set_config(self, configuration):
         for key, value in configuration.items():
-            setattr(self.eiger, key, value)
+            setattr(self.detector, key, value)
 
     def get_status(self):
-        return self.eiger.status
+        return self.detector.status
 
