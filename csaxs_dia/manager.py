@@ -1,6 +1,5 @@
 from copy import copy
 from logging import getLogger
-from time import time
 
 from detector_integration_api.utils import check_for_target_status
 from csaxs_dia import validation_eiger9m
@@ -74,12 +73,11 @@ class IntegrationManager(object):
         return check_for_target_status(self.get_acquisition_status, IntegrationStatus.READY)
 
     def get_acquisition_status(self):
-
-        status = validation_eiger9m.interpret_status(self.status_provider.get_status_details())
+        status = validation_eiger9m.interpret_status(self.status_provider.get_quick_status_details())
         return status
 
     def get_status_details(self):
-        return self.status_provider.get_status_details()
+        return self.status_provider.get_complete_status_details()
 
     def get_acquisition_status_string(self):
         return str(self.get_acquisition_status())

@@ -20,7 +20,9 @@ class StatusProvider(object):
         self._last_writer_status = None
         self._last_detector_status = None
 
-    def get_status_details(self):
+    def get_quick_status_details(self):
+
+        _logger.info("Getting quick status details.")
 
         _audit_logger.info("writer_client.get_status()")
         try:
@@ -30,9 +32,40 @@ class StatusProvider(object):
             writer_status = IntegrationStatus.COMPONENT_NOT_RESPONDING.value
         self._last_writer_status = writer_status
 
-        # TODO: Remove this once we are sure this statuses are not needed to operate the detector.
         backend_status = None
         detector_status = None
+
+        _logger.debug("Detailed status requested:\nWriter: %s\nBackend: %s\nDetector: %s",
+                      writer_status, backend_status, detector_status)
+
+        return {"writer": writer_status,
+                "backend": backend_status,
+                "detector": detector_status}
+
+    def get_complete_status_details(self):
+
+        _logger.info("Getting complete status details.")
+
+        _audit_logger.info("writer_client.get_status()")
+        try:
+            writer_status = self.writer_client.get_status() \
+                if self.writer_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
+        except:
+            writer_status = IntegrationStatus.COMPONENT_NOT_RESPONDING.value
+
+        _audit_logger.info("backend_client.get_status()")
+        try:
+            backend_status = self.backend_client.get_status() \
+                if self.backend_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
+        except:
+            backend_status = IntegrationStatus.COMPONENT_NOT_RESPONDING.value
+
+        _audit_logger.info("detector_client.get_status()")
+        try:
+            detector_status = self.detector_client.get_status() \
+                if self.detector_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
+        except:
+            detector_status = IntegrationStatus.COMPONENT_NOT_RESPONDING.value
 
         _logger.debug("Detailed status requested:\nWriter: %s\nBackend: %s\nDetector: %s",
                       writer_status, backend_status, detector_status)
