@@ -1,7 +1,6 @@
 from logging import getLogger
 
 from detector_integration_api.utils import ClientDisableWrapper
-from time import time
 from csaxs_dia.validation_eiger9m import IntegrationStatus
 from csaxs_dia.detector_client import EigerClientWrapper
 
@@ -9,7 +8,7 @@ _audit_logger = getLogger("audit_trail")
 _logger = getLogger(__name__)
 
 
-class CachedStatusProvider(object):
+class StatusProvider(object):
     def __init__(self, backend_client, writer_client, detector_client):
         self.backend_client = backend_client
         self.writer_client = writer_client
@@ -22,8 +21,6 @@ class CachedStatusProvider(object):
         self._last_detector_status = None
 
     def get_status_details(self):
-
-        _audit_logger.info("Getting status details.")
 
         _audit_logger.info("writer_client.get_status()")
         try:
@@ -43,4 +40,3 @@ class CachedStatusProvider(object):
         return {"writer": writer_status,
                 "backend": backend_status,
                 "detector": detector_status}
-

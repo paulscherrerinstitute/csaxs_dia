@@ -11,7 +11,7 @@ from detector_integration_api.utils import ClientDisableWrapper
 
 from csaxs_dia import manager
 from detector_integration_api.client.detector_cli_client import DetectorClient
-from csaxs_dia.status_provider import CachedStatusProvider
+from csaxs_dia.status_provider import StatusProvider
 
 _logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ def start_integration_server(host, port, backend_api_url, backend_stream_url, wr
     writer_client = ClientDisableWrapper(writer_client)
     detector_client = ClientDisableWrapper(detector_client)
 
-    status_provider = CachedStatusProvider(backend_client, writer_client, detector_client)
+    status_provider = StatusProvider(backend_client, writer_client, detector_client)
 
     integration_manager = manager.IntegrationManager(writer_client=writer_client,
                                                      backend_client=backend_client,
