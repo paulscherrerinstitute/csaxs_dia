@@ -85,6 +85,9 @@ class IntegrationManager(object):
 
         return status
 
+    def get_status_details(self):
+        return self.status_provider.get_status_details()
+
     def get_acquisition_status_string(self):
         return str(self.get_acquisition_status())
 
