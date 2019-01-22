@@ -7,7 +7,6 @@ _logger = getLogger(__name__)
 
 
 class IntegrationStatus(Enum):
-    INITIALIZED = "initialized",
     READY = "ready",
     RUNNING = "running",
     ERROR = "error",
@@ -18,7 +17,7 @@ E_ACCOUNT_USER_ID_RANGE = [10000, 29999]
 
 MANDATORY_WRITER_CONFIG_PARAMETERS = ["n_frames", "user_id", "output_file"]
 MANDATORY_BACKEND_CONFIG_PARAMETERS = ["bit_depth"]
-MANDATORY_DETECTOR_CONFIG_PARAMETERS = ["period", "n_frames", "dr", "exptime", "timing"]
+MANDATORY_DETECTOR_CONFIG_PARAMETERS = ["period", "frames", "dr", "exptime", "timing"]
 
 CSAXS_FORMAT_INPUT_PARAMETERS = {}
 
@@ -81,10 +80,17 @@ def validate_detector_config(configuration):
     if not configuration:
         raise ValueError("Detector configuration cannot be empty.")
 
+    #TODO: Move to n_frames with new detector client.
+    if "n_frames" in configuration:
+        configuration['frames'] = configuration["n_frames"]
+        del configuration["n_frames"]
+
+
     if not all(x in configuration for x in MANDATORY_DETECTOR_CONFIG_PARAMETERS):
         missing_parameters = [x for x in MANDATORY_DETECTOR_CONFIG_PARAMETERS if x not in configuration]
         raise ValueError("Detector configuration missing mandatory parameters: %s" % missing_parameters)
 
+    
 
 def validate_configs_dependencies(writer_config, backend_config, detector_config):
     if backend_config["bit_depth"] != detector_config["dr"]:
@@ -92,7 +98,8 @@ def validate_configs_dependencies(writer_config, backend_config, detector_config
                          " They must be equal."
                          % (backend_config["bit_depth"], detector_config["dr"]))
 
-    if detector_config["n_frames"] != writer_config["n_frames"]:
+    #TODO: Move to n_frames with new detector client.
+    if detector_config["frames"] != writer_config["n_frames"]:
         raise ValueError("Invalid config. Detector 'n_frames' set to '%s', but writer 'n_frames' set to '%s'."
                          " They must be equal."
                          % (detector_config["n_frames"], writer_config["n_frames"]))
@@ -120,13 +127,10 @@ def interpret_status(statuses, configured):
     # If no other conditions match.
     interpreted_status = IntegrationStatus.ERROR
 
-    if cmp(writer, "stopped") and cmp(detector, "idle") and not configured:
-        interpreted_status = IntegrationStatus.INITIALIZED
-
-    elif cmp(writer, "stopped") and cmp(detector, "idle") and cmp(backend, "OPEN") and configured:
+    if cmp(writer, "stopped"):
         interpreted_status = IntegrationStatus.READY
 
-    elif cmp(writer, ("receiving", "writing")) and cmp(backend, "OPEN") and configured:
+    elif cmp(writer, ("receiving", "writing")):
         interpreted_status = IntegrationStatus.RUNNING
 
     return interpreted_status
