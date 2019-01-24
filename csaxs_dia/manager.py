@@ -143,7 +143,7 @@ class IntegrationManager(object):
         else:
             _logger.info("Backend config did not change. Skipping.")
 
-        _audit_logger.info("[%d ms] writer_client.set_parameters(writer_config)")
+        _audit_logger.info("writer_client.set_parameters(writer_config)")
         self.writer_client.set_parameters(writer_config)
         self._last_set_writer_config = writer_config
 
