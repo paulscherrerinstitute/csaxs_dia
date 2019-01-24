@@ -48,6 +48,9 @@ def start_integration_server(host, port, backend_api_url, backend_stream_url, wr
     app = bottle.Bottle()
     register_rest_interface(app=app, integration_manager=integration_manager)
 
+    _logger.info("Resetting DAQ before to verify components.")
+    integration_manager.reset()
+
     try:
         bottle.run(app=app, host=host, port=port)
     finally:

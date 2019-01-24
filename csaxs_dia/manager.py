@@ -88,7 +88,6 @@ class IntegrationManager(object):
                 "backend": copy(self._last_set_backend_config),
                 "detector": copy(self._last_set_detector_config)}
 
-
     def set_acquisition_config(self, new_config):
         status = self.get_acquisition_status()
 
