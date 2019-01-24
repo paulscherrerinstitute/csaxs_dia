@@ -1,0 +1,9 @@
+{
+  "backend": {"bit_depth": 16},
+  "detector": {"dr": 16, "frames": 100, "period": 0.04, "exptime": 0.001, "timing":"auto", "cycles":1},
+  "writer": {
+    "n_frames": 100,
+    "output_file": "/gpfs/perf/X12SA/Data10/gac-x12saop/tmp/daq_test.h5",
+    "user_id": 11057
+  }
+}

@@ -1,8 +1,0 @@
-{"backend": {"bit_depth": 16, "n_frames": 10},
- "detector": {"dr": 16, "exptime": 1, "frames": 10, "period": 0.1, "exptime": 0.001},
- "writer": {
-  "n_frames": 10,
-  "output_file": "/sls/X12SA/Data10/gac-x12saop/tmp/dia_test_4.h5",
-  "user_id": 11057
- }
-}
