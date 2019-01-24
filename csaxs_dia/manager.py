@@ -33,7 +33,7 @@ class IntegrationManager(object):
 
         self.last_config_successful = False
 
-    def start_acquisition(self, configuration):
+    def start_acquisition(self, parameters):
 
         _audit_logger.info("Starting acquisition.")
 
@@ -43,7 +43,7 @@ class IntegrationManager(object):
             raise ValueError("Cannot start acquisition in %s state." % status)
 
         _audit_logger.info("self.set_acquisition_config()")
-        self.set_acquisition_config(configuration)
+        self.set_acquisition_config(parameters)
 
         _audit_logger.info("writer_client.start()")
         self.writer_client.start()
