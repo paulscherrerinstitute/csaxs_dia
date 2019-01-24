@@ -16,10 +16,6 @@ class StatusProvider(object):
 
         self.eiger = EigerClientWrapper()
 
-        self._last_backend_status = None
-        self._last_writer_status = None
-        self._last_detector_status = None
-
     def get_quick_status_details(self):
 
         _logger.info("Getting quick status details.")
@@ -30,7 +26,6 @@ class StatusProvider(object):
                 if self.writer_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
         except:
             writer_status = IntegrationStatus.COMPONENT_NOT_RESPONDING.value
-        self._last_writer_status = writer_status
 
         backend_status = None
         detector_status = None
