@@ -212,7 +212,7 @@ class IntegrationManager(object):
         _audit_logger.info("writer_client.reset()")
         try_catch(self.writer_client.reset, "Error while trying to reset the writer.")()
 
-        return check_for_target_status(self.get_acquisition_status, IntegrationStatus.INITIALIZED)
+        return check_for_target_status(self.get_acquisition_status, IntegrationStatus.READY)
 
     def kill(self):
         _audit_logger.info("Killing acquisition.")
