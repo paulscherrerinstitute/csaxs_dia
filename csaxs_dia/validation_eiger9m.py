@@ -72,8 +72,8 @@ def validate_backend_config(configuration):
         missing_parameters = [x for x in MANDATORY_BACKEND_CONFIG_PARAMETERS if x not in configuration]
         raise ValueError("Backend configuration missing mandatory parameters: %s" % missing_parameters)
 
-    if configuration.get("n_frames", -1) != -1:
-        raise ValueError("The only allowed values for backend config n_frames=-1.")
+    if configuration.get("n_frames", 0) != 0:
+        raise ValueError("The only allowed values for backend config n_frames=0.")
 
 
 def validate_detector_config(configuration):
