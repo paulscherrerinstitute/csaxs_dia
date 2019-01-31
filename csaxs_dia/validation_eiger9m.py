@@ -17,7 +17,7 @@ E_ACCOUNT_USER_ID_RANGE = [10000, 29999]
 
 MANDATORY_WRITER_CONFIG_PARAMETERS = ["n_frames", "user_id", "output_file"]
 MANDATORY_BACKEND_CONFIG_PARAMETERS = ["bit_depth"]
-MANDATORY_DETECTOR_CONFIG_PARAMETERS = ["period", "frames", "dr", "exptime", "timing"]
+MANDATORY_DETECTOR_CONFIG_PARAMETERS = ["period", "frames", "dr", "exptime", "timing", "cycles"]
 
 CSAXS_FORMAT_INPUT_PARAMETERS = {}
 
@@ -98,10 +98,22 @@ def validate_configs_dependencies(writer_config, backend_config, detector_config
                          % (backend_config["bit_depth"], detector_config["dr"]))
 
     # TODO: Move to n_frames with new detector client.
-    if detector_config["frames"] != writer_config["n_frames"]:
-        raise ValueError("Invalid config. Detector 'n_frames' set to '%s', but writer 'n_frames' set to '%s'."
-                         " They must be equal."
-                         % (detector_config["n_frames"], writer_config["n_frames"]))
+    if detector_config["timing"] == "auto":
+        if detector_config["frames"] != writer_config["n_frames"]:
+            raise ValueError("Invalid config for timing auto. "
+                             "Detector 'n_frames' set to '%s', but writer 'n_frames' set to '%s'."
+                             " They must be equal."
+                             % (detector_config["n_frames"], writer_config["n_frames"]))
+
+    elif detector_config["timing"] == "trigger":
+        if detector_config["cycles"] != writer_config["n_frames"]:
+            raise ValueError("Invalid config for timing trigger. "
+                             "Detector 'cycles' set to '%s', but writer 'n_frames' set to '%s'."
+                             " They must be equal."
+                             % (detector_config["cycles"], writer_config["n_frames"]))
+
+    else:
+        raise ValueError("Unexpected detector timing config '%s'. Use 'timing' or 'auto'." % detector_config["timing"])
 
 
 def interpret_status(statuses):
