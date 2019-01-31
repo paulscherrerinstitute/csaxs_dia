@@ -159,17 +159,17 @@ Methods that do not modify the state machine are not described in this table, as
 
 | State | State description | Transition method | Next state |
 |-------|-------------------|-------------------|------------|
-| IntegrationStatus.READY | Integration ready for configuration. |||
+| IntegrationStatus.READY | Integration ready to start. |||
 | | | start | IntegrationStatus.RUNNING |
 | | | stop | IntegrationStatus.READY |
 | | | reset | IntegrationStatus.READY |
-| IntegrationStatus.RUNNING | Acquisition configured. |||
+| IntegrationStatus.RUNNING | Acquisition started. |||
 | | | start | IntegrationStatus.RUNNING |
 | | | stop | IntegrationStatus.READY |
 | | | reset | IntegrationStatus.READY |
-| IntegrationStatus.ERROR | Acquisition running. |||
+| IntegrationStatus.ERROR | Components in unexpected state. |||
 | | | reset | IntegrationStatus.READY |
-| IntegrationStatus.COMPONENT_NOT_RESPONSING | Waiting for backend and writer to finish. |||
+| IntegrationStatus.COMPONENT_NOT_RESPONSING | Some component is not responding. |||
 | | | reset | IntegrationStatus.READY |
 
 A short summary would be:
