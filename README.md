@@ -15,6 +15,16 @@ The following README is useful for controlling the Eiger 9M deployment at cSAXS.
 
 - **25 Hz MAX operations**. Might loose frames if operated at above this frequency.
 
+## Operation general info:
+
+- In case something goes wrong (restart of backend, acquisition not completed normally etc.) a DIA reset is needed.
+- If the backend is not responding (usually due to waiting for lost packets) a backend reset (systemctl) is needed.
+After the backend hard reset, a DIA reset is also needed to reconfigure it.
+- There might be some delays from the moment you write the file to the moment you are able to see it on the consoles.
+This is due to the folder caching done by the file system. To flush the cache you can try:
+    - stat FOLDER_OF_FILE
+    - touch FOLDER_OF_FILE
+
 ## Software installed
 
 The detector integration is made up from the following components:
