@@ -4,6 +4,19 @@
 
 The following README is useful for controlling the Eiger 9M deployment at cSAXS.
 
+## Useful info for users
+
+- Preview Address: http://xbl-daq-29:5006/csaxs
+- [Eiger Manual](http://slsdetectors.web.psi.ch/docs/pdf/slsDetectorClientDocs.pdf)
+- DIA Address: http://xbl-daq-29:10000
+- Writer logs: /var/log/h5_zmq_writer/ (on xbl-daq-29)
+
+## DAQ limitations
+
+- **25 Hz MAX operations**. Might loose frames if operated at above this frequency.
+
+## Software installed
+
 The detector integration is made up from the following components:
 
 - Detector integration API (running on xbl-daq-29)
@@ -14,6 +27,8 @@ The detector integration is made up from the following components:
     - https://git.psi.ch/HPDI/dafl.psidet
 - Writer process (running on xbl-daq-29)
     - https://github.com/paulscherrerinstitute/lib_cpp_h5_writer
+- Stream visualizer (running on xbl-daq-29)
+    - https://github.com/ivan-usov/streamvis/
     
 # Table of content
 1. [Quick introduction](#quick)
@@ -25,7 +40,7 @@ The detector integration is made up from the following components:
     2. [Backend configuration](#dia_configuration_parameters_backend)
     3. [Writer configuration](#dia_configuration_parameters_writer)
 4. [xbl-daq-28 (Backend server)](#deployment_info_28)
-5. [xbl-daq-27 (DIA and writer server)](#deployment_info_27)
+5. [xbl-daq-27 (DIA, writer and preview server)](#deployment_info_27)
 
 <a id="quick"></a>
 ## Quick introduction
@@ -59,33 +74,39 @@ from detector_integration_api import DetectorIntegrationClient
 # Connect to the Eiger 9M DIA.
 client = DetectorIntegrationClient("http://xbl-daq-29:10000")
 
-# Make sure the status of the DIA is initialized.
+# This is optional. Restart DIA if you are not sure about its state.
 client.reset()
 
-# Write 1000 frames, as user id 11057 (gac-x12saop), to file "/gpfs/perf/X12SA/Data10/gac-x12saop/tmp/dia_test.h5".
-writer_config = {"n_frames": 1000, "user_id": 11057, "output_file": "/gpfs/perf/X12SA/Data10/gac-x12saop/tmp/dia_test.h5"}
-
-# Expect 1000, 16 bit frames.
-backend_config = {"bit_depth": 16, "n_frames": 1000, "preview_modulo": 10}
-
-# Acquire 1000, 16 bit images with a period of 0.02.
-detector_config = {"dr": 16, "frames": 1000, "period": 0.02, "exptime": 0.0001}
-
-configuration = {"writer": writer_config,
-                 "backend": backend_config,
-                 "detector": detector_config}
-
-# Set the configs.
-client.set_config(configuration)
+configuration = {
+    "backend": {
+        "bit_depth": 32, 
+        "preview_modulo": 10
+    },
+    
+    "detector": {
+        "dr": 32, 
+        "frames": 100, 
+        "period": 0.04, 
+        "exptime": 0.001, 
+        "timing": "auto", 
+        "cycles": 1
+    },
+    
+    "writer": {
+        "n_frames": 100,
+        "output_file": "/gpfs/perf/X12SA/Data10/gac-x12saop/tmp/daq_test_32b_100f.h5",
+        "user_id": 11057
+    }
+}
 
 # Start the acquisition.
-client.start()
+client.start(parameters=configuration)
 
-# Get the current acquisition status (it should be "IntegrationStatus.RUNNING")
+# Optional. Get the integration status.
 client.get_status()
 
-# Block until the acquisition has finished (this is optional).
-client.wait_for_status("IntegrationStatus.FINISHED")
+# Block until the DAQ is ready again (this is optional).
+client.wait_for_status("IntegrationStatus.READY")
 
 ```
 
@@ -108,29 +129,24 @@ id -u gac-x12saop
 ```
 
 ```bash
-# Make sure the status of the DIA is initialized.
+# This is optional. Restart DIA if you are not sure about its state.
 curl -X POST http://xbl-daq-29:10000/api/v1/reset
 
 # Write 1000 frames, as user id 11057 (gac-x12saop), to file "/gpfs/perf/X12SA/Data10/gac-x12saop/tmp/dia_test.h5".
-curl -X PUT http://xbl-daq-29:10000/api/v1/config -H "Content-Type: application/json" -d '
-{"backend": {"bit_depth": 16, "n_frames": 10, "preview_modulo": 10},
- "detector": {"dr": 16, "exptime": 1, "frames": 10, "period": 0.1, "exptime": 0.001, "timing":"auto"},
+curl -X POST http://xbl-daq-29:10000/api/v1/start -H "Content-Type: application/json" -d '
+{"backend": {"bit_depth": 16, "preview_modulo": 10},
+ "detector": {"dr": 32, "exptime": 0.001, "frames": 100, "period": 0.04, "timing":"auto"},
  "writer": {
-  "n_frames": 10,
-  "output_file": "/gpfs/perf/X12SA/Data10/gac-x12saop/tmp/dia_test.h5",
+  "n_frames": 100,
+  "output_file": "/gpfs/perf/X12SA/Data10/gac-x12saop/tmp/daq_test_32b_100f.h5",
   "user_id": 11057
  }
 }'
 
-# Start the acquisition.
-curl -X POST http://xbl-daq-29:10000/api/v1/start
-
 # Get integration status.
 curl -X GET http://xbl-daq-29:10000/api/v1/status
 
-# Stop the acquisition. This should be called only in case of emergency:
-#   by default it should stop then the selected number of images is collected.
-curl -X POST http://xbl-daq-29:10000/api/v1/stop
+# There is no "wait for status" if you are using curl - it is implemented in the Python client.
 ```
 
 <a id="state_machine"></a>
@@ -143,41 +159,27 @@ Methods that do not modify the state machine are not described in this table, as
 
 | State | State description | Transition method | Next state |
 |-------|-------------------|-------------------|------------|
-| IntegrationStatus.INITIALIZED | Integration ready for configuration. |||
-| | | set_config | IntegrationStatus.CONFIGURED |
-| | | set_last_config | IntegrationStatus.CONFIGURED |
-| | | update_config | IntegrationStatus.CONFIGURED |
-| | | stop | IntegrationStatus.INITIALIZED |
-| | | reset | IntegrationStatus.INITIALIZED |
-| IntegrationStatus.CONFIGURED | Acquisition configured. |||
+| IntegrationStatus.READY | Integration ready for configuration. |||
 | | | start | IntegrationStatus.RUNNING |
-| | | set_config | IntegrationStatus.CONFIGURED |
-| | | set_last_config | IntegrationStatus.CONFIGURED |
-| | | update_config | IntegrationStatus.CONFIGURED |
-| | | stop | IntegrationStatus.INITIALIZED |
-| | | reset | IntegrationStatus.INITIALIZED |
-| IntegrationStatus.RUNNING | Acquisition running. |||
-| | | stop | IntegrationStatus.INITIALIZED |
-| | | reset | IntegrationStatus.INITIALIZED |
-| IntegrationStatus.DETECTOR_STOPPED | Waiting for backend and writer to finish. |||
-| | | stop | IntegrationStatus.INITIALIZED |
-| | | reset | IntegrationStatus.INITIALIZED |
-| IntegrationStatus.FINISHED | Acquisition completed. |||
-| | | reset | IntegrationStatus.INITIALIZED |
-| IntegrationStatus.ERROR | Something went wrong. |||
-| | | stop | IntegrationStatus.INITIALIZED |
-| | | reset | IntegrationStatus.INITIALIZED |
+| | | stop | IntegrationStatus.READY |
+| | | reset | IntegrationStatus.READY |
+| IntegrationStatus.RUNNING | Acquisition configured. |||
+| | | start | IntegrationStatus.RUNNING |
+| | | stop | IntegrationStatus.READY |
+| | | reset | IntegrationStatus.READY |
+| IntegrationStatus.ERROR | Acquisition running. |||
+| | | reset | IntegrationStatus.READY |
+| IntegrationStatus.COMPONENT_NOT_RESPONSING | Waiting for backend and writer to finish. |||
+| | | reset | IntegrationStatus.READY |
 
 A short summary would be:
 
-- You always need to configure the integration before starting the acquisition.
+- During normal operations the DAQ should be in READY or RUNNING state.
 - You cannot change the configuration while the acquisition is running or there is an error.
-- The stop method can be called in every state, but it stop the acquisition only if it is running.
-- Whatever happens, you have the reset method that returns you in the initial state.
-- When the detector stops sending data, the status is DETECTOR_STOPPED. Call STOP to close the backend and stop the 
-writing.
+- The reset method can be called in every state, it stops the acquisition and prepared the DAQ for the next one.
+- If something unexpected happens, use the RESET method to bring the DAQ to an operational state again.
 - When the detector stops sending data, the backend and writer have completed, 
-the status is FINISHED.
+the status is READY again and you can start the next acquisition.
 
 <a id="dia_configuration_parameters"></a>
 ## DIA configuration parameters
@@ -192,17 +194,29 @@ The mandatory attributes for the detector configuration are:
 - *"frames"*: Number of frames to acquire.
 - *"dr"*: Dynamic range - number of bits (16, 32 etc.)
 - *"exptime"* - Exposure time.
+- *"cycles"* - Number of cycles to execute.
 
 In addition, any attribute that the detector supports can be passed here. Please refer to the detector manual for a 
-complete list and explanation of the attributes.
+complete list and explanation of the attributes:
+
+[Eiger Manual](http://slsdetectors.web.psi.ch/docs/pdf/slsDetectorClientDocs.pdf)
+
+**Warning**: Please note that this attribute must match the information you provided to the detector:
+
+- (backend) bit_depth == (detector) dr
+- if (detector) timing == auto
+    - (writer) n_frames == (detector) frames
+- if (detector) timing == trigger
+    - (writer) n_frames == (detector) cycles
 
 An example of a valid detector config:
 ```json
 {
-  "period": 0.1,
-  "frames": 1000,
-  "dr": 16,
-  "exptime": 0.0001
+  "period": 0.04,
+  "frames": 100,
+  "dr": 32,
+  "exptime": 0.0001,
+  "timing": "auto"
 }
 ```
 
@@ -211,7 +225,6 @@ An example of a valid detector config:
 Available and at the same time mandatory backend attributes:
 
 - *"bit_depth"*: Dynamic range - number of bits (16, 32 etc.)
-- *"n_frames"*: Number of frames per acquisition.
 - *"preview_modulo"*: Modulo to use for the stream preview.
 - *"preview_modulo_offset"*: Offset to apply to the frame number before the modulo.
 - *"send_every_s"*: Time (in seconds) between frames to be sent to the stream preview.
@@ -219,18 +232,16 @@ Available and at the same time mandatory backend attributes:
 **Note**: The send_every_s attribute has precedence over the preview_modulo setting. Using both at the same time 
 does not make sense and doing so might result in unexpected behaviour.
 
-**Warning**: Please note that this 2 attributes must match the information you provided to the detector:
+**Warning**: Please note that this attribute must match the information you provided to the detector:
 
 - (backend) bit_depth == (detector) dr
-- (backend) n_frames == (detector) frames
 
 If this is not the case, the configuration will fail.
 
 An example of a valid backend config:
 ```json
 {
-  "bit_depth": 16,
-  "n_frames": 1000,
+  "bit_depth": 32,
   "preview_modulo": 10,
   "preview_offset": 5
 }
@@ -254,9 +265,12 @@ An example of a valid writer config would be:
 }
 ```
 
-**Warning**: Please note that this 2 attributes must match the information you provided to the detector:
+**Warning**: Please note that this attribute must match the information you provided to the detector:
 
-- (writer) n_frames == (detector) frames
+- if (detector) timing == auto
+    - (writer) n_frames == (detector) frames
+- if (detector) timing == trigger
+    - (writer) n_frames == (detector) cycles
 
 If this is not the case, the configuration will fail.
 
@@ -267,45 +281,61 @@ To configure the writer, you must specify:
 - *"n_frames"*: Number of frames to acquire.
 - *"user_id"*: Under which user to run the writer.
 
-In addition to this properties, a valid config must also have the parameters needed for the cSAXS file format.
+In addition to this properties, a valid config must also have the parameters needed for the cSAXS file format 
+(No parameters currently).
 
 ## Preview mode
+The preview mode is meant for alignment. You should trigger the detector using timing. You will receive each 
+image in the preview web app and the acquisition will be continuously running until you call stop.
+
+The preview web app can be accessed on: http://xbl-daq-29:5006/csaxs
+
 To put the detector into preview mode, use the following parameters:
 
 ```python
+# Import the client.
 # Import the client.
 from detector_integration_api import DetectorIntegrationClient
 
 # Connect to the Eiger 9M DIA.
 client = DetectorIntegrationClient("http://xbl-daq-29:10000")
 
-# Make sure the status of the DIA is initialized.
+# This is optional. Restart DIA if you are not sure about its state.
 client.reset()
 
-# Write 1000 frames, as user id 11057 (gac-x12saop), to file "/gpfs/perf/X12SA/Data10/gac-x12saop/tmp/dia_test.h5".
-writer_config = {"n_frames": 1000, "user_id": 11057, "output_file": "/gpfs/perf/X12SA/Data10/gac-x12saop/tmp/dia_test.h5"}
-
-# Expect 1000, 16 bit frames.
-backend_config = {"bit_depth": 16, "n_frames": 1000, "preview_modulo": 10}
-
-# Acquire 1000, 16 bit images with a period of 0.02.
-detector_config = {"dr": 16, "frames": 1, "period": 0.02, "exptime": 0.0001, "cycles": 1000, "timing"="trigger"}
-
-configuration = {"writer": writer_config,
-                 "backend": backend_config,
-                 "detector": detector_config}
-
-# Set the configs.
-client.set_config(configuration)
+configuration = {
+    "backend": {
+        "bit_depth": 32, 
+        "preview_modulo":1
+    },
+    
+    "detector": {
+        "dr": 32, 
+        "frames": 1, 
+        "period": 0.04, 
+        "exptime": 0.001, 
+        "timing": "auto", 
+        "cycles": 1000
+    },
+    
+    "writer": {
+        "n_frames": 1000,
+        "output_file": "/gpfs/perf/X12SA/Data10/gac-x12saop/tmp/daq_test_32b_100f.h5",
+        "user_id": 11057
+    }
+}
 
 # Start the acquisition.
-client.start()
+client.start(parameters=configuration)
+
+# Stop the acquisition when you have finished the alignment.
+client.stop()
 
 ```
 
 #### cSAXS file format config
 
-No format fields at the moment.
+No format fields at the moment. We use the default SF format.
 
 <a id="deployment_info"></a>
 ## Deployment information
@@ -328,7 +358,7 @@ The service can be controlled with the following commands (using sudo or root):
 - **journalctl -u dbe.service -f** (check the backend logs)
 
 <a id="deployment_info_29"></a>
-## xbl-daq-29 (DIA and writer server)
+## xbl-daq-29 (DIA, writer and preview server)
 On xbl-daq-29 we are running the detector integration api. The DIA is listening on address:
 
 - **http://xbl-daq-29:10000**
@@ -346,3 +376,24 @@ The service can be controlled with the following commands (using sudo or root):
 The writer is spawn on request from the DIA. To do that, DIA uses the startup file **/home/dia/start_writer.sh**.
 
 Each time the writer is spawn, a separate log file is generated in **/var/log/h5_zmq_writer/**.
+
+To open the last writer log file, the 'wlog' alias is added to some account. You can add this alias to your own 
+~/.bashrc by adding:
+
+```bash
+alias wlog='less /var/log/h5_zmq_writer/$(ls /var/log/h5_zmq_writer/ -tr | tail -n 1)'
+```
+
+### Preview
+The preview is also running on xbl-daq-29. The previw can be accessed with any web browser on address:
+
+- http://xbl-daq-29:5006/csaxs
+
+It is run using a **systemd** service (/etc/systemd/system/vis.service). 
+
+The services invokes the startup file **/home/vis/start_vis.sh**.
+
+The service can be controlled with the following commands (using sudo or root):
+- **systemctl start vis.service** (start the vis)
+- **systemctl stop vis.service** (stop the vis)
+- **journalctl -u vis.service -f** (check the vis logs)
