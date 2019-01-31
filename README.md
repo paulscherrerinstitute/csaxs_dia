@@ -39,8 +39,10 @@ The detector integration is made up from the following components:
     1. [Detector configuration](#dia_configuration_parameters_detector)
     2. [Backend configuration](#dia_configuration_parameters_backend)
     3. [Writer configuration](#dia_configuration_parameters_writer)
-4. [xbl-daq-28 (Backend server)](#deployment_info_28)
-5. [xbl-daq-27 (DIA, writer and preview server)](#deployment_info_27)
+4. [Preview mode](#dia_preview_mode) 
+5. [xbl-daq-28 (Backend server)](#deployment_info_28)
+6. [xbl-daq-27 (DIA, writer and preview server)](#deployment_info_27)
+
 
 <a id="quick"></a>
 ## Quick introduction
@@ -284,6 +286,11 @@ To configure the writer, you must specify:
 In addition to this properties, a valid config must also have the parameters needed for the cSAXS file format 
 (No parameters currently).
 
+#### cSAXS file format config
+
+No format fields at the moment. We use the default SF format.
+
+<a id="dia_preview_mode"></a>
 ## Preview mode
 The preview mode is meant for alignment. You should trigger the detector using timing. You will receive each 
 image in the preview web app and the acquisition will be continuously running until you call stop.
@@ -332,10 +339,6 @@ client.start(parameters=configuration)
 client.stop()
 
 ```
-
-#### cSAXS file format config
-
-No format fields at the moment. We use the default SF format.
 
 <a id="deployment_info"></a>
 ## Deployment information
