@@ -7,7 +7,7 @@ The following README is useful for controlling the Eiger 9M deployment at cSAXS.
 ## Useful info for users
 
 - Preview Address: http://xbl-daq-29:5006/csaxs
-- [Eiger Manual](http://slsdetectors.web.psi.ch/docs/pdf/slsDetectorClientDocs.pdf)
+- [Eiger Manual](http://slsdetectors.web.psi.ch/hardwareDocumentation/Eiger_short.pdf)
 - DIA Address: http://xbl-daq-29:10000
 - Writer logs: /var/log/h5_zmq_writer/ (on xbl-daq-29)
 
@@ -211,7 +211,7 @@ The mandatory attributes for the detector configuration are:
 In addition, any attribute that the detector supports can be passed here. Please refer to the detector manual for a 
 complete list and explanation of the attributes:
 
-[Eiger Manual](http://slsdetectors.web.psi.ch/docs/pdf/slsDetectorClientDocs.pdf)
+[Eiger Manual](http://slsdetectors.web.psi.ch/hardwareDocumentation/Eiger_short.pdf)
 
 **Warning**: Please note that this attribute must match the information you provided to the detector:
 
