@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name="csaxs_dia",
-      version="1.3.1",
+      version="2.0.0",
       maintainer="Paul Scherrer Institute",
       maintainer_email="daq@psi.ch",
       author="Paul Scherrer Institute",
