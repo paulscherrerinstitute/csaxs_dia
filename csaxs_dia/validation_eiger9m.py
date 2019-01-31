@@ -105,13 +105,12 @@ def validate_configs_dependencies(writer_config, backend_config, detector_config
                              " They must be equal."
                              % (detector_config["n_frames"], writer_config["n_frames"]))
 
-    elif detector_config["timing"] == "trigger":
+    elif detector_config["timing"] == "trigger" or detector_config["timing"] == "gating":
         if detector_config["cycles"] != writer_config["n_frames"]:
             raise ValueError("Invalid config for timing trigger. "
                              "Detector 'cycles' set to '%s', but writer 'n_frames' set to '%s'."
                              " They must be equal."
                              % (detector_config["cycles"], writer_config["n_frames"]))
-
     else:
         raise ValueError("Unexpected detector timing config '%s'. Use 'timing' or 'auto'." % detector_config["timing"])
 
