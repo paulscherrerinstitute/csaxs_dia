@@ -18,3 +18,6 @@ class EigerClientWrapper(object):
 
     def get_status(self):
         return self.new_client.status
+
+    def set_threshold(self, energy):
+        self.new_client.threshold = energy
