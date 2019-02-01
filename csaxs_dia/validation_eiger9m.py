@@ -90,6 +90,10 @@ def validate_detector_config(configuration):
         missing_parameters = [x for x in MANDATORY_DETECTOR_CONFIG_PARAMETERS if x not in configuration]
         raise ValueError("Detector configuration missing mandatory parameters: %s" % missing_parameters)
 
+    if configuration["timing"] == "gating":
+        configuration["exptime"] = -1
+        configuration["period"] = -1
+
 
 def validate_configs_dependencies(writer_config, backend_config, detector_config):
     if backend_config["bit_depth"] != detector_config["dr"]:
