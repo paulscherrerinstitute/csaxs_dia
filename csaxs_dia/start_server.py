@@ -9,7 +9,7 @@ from detector_integration_api.client.cpp_writer_client import CppWriterClient
 from detector_integration_api.rest_api.rest_server import register_rest_interface
 from detector_integration_api.utils import ClientDisableWrapper
 
-from csaxs_dia import manager
+from csaxs_dia import manager, rest_addon
 
 from csaxs_dia.detector_client import EigerClientWrapper
 from csaxs_dia.status_provider import StatusProvider
@@ -47,6 +47,7 @@ def start_integration_server(host, port, backend_api_url, backend_stream_url, wr
 
     app = bottle.Bottle()
     register_rest_interface(app=app, integration_manager=integration_manager)
+    rest_addon.add_rest_interface(app=app, integration_manager=integration_manager)
 
     _logger.info("Resetting DAQ before to verify components.")
     integration_manager.reset()
