@@ -24,6 +24,16 @@ After the backend hard reset, a DIA reset is also needed to reconfigure it.
 This is due to the folder caching done by the file system. To flush the cache you can try:
     - stat FOLDER_OF_FILE
     - touch FOLDER_OF_FILE
+    
+### Setting detector threshold energy
+
+Currently you can set the detector threshold energy only via the REST Api (not supported in Python client).
+
+```bash
+# Set the detector threshold value to 7500
+curl -X POST http://xbl-daq-29:10000/api/v1/threshold -H "Content-Type: application/json" -d '
+{"energy": 7500}'
+```
 
 ## Software installed
 
