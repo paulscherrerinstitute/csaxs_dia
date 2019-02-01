@@ -99,7 +99,23 @@ class IntegrationManager(object):
 
         self._set_acquisition_config(new_config)
 
-        return check_for_target_status(self.get_acquisition_status, IntegrationStatus.READY)      
+        return check_for_target_status(self.get_acquisition_status, IntegrationStatus.READY)
+
+    def set_threshold(self, configuration):
+        status = self.get_acquisition_status()
+
+        if status != IntegrationStatus.READY:
+            raise ValueError("Cannot set threshold in status %s. Please reset() first." % status)
+
+        if "energy" not in configuration:
+            raise ValueError("Please provide 'energy' value in the config JSON.")
+
+        energy = configuration["energy"]
+        _logger.info("Setting threshold energy to %s.", energy)
+
+        self.detector_client.set_threshold(energy)
+
+        return status
 
     def _set_acquisition_config(self, new_config):
 
