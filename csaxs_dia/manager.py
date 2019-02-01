@@ -36,7 +36,10 @@ class IntegrationManager(object):
     def start_acquisition(self, parameters):
 
         _audit_logger.info("Starting acquisition.")
-
+        
+        if not parameters:
+            raise ValueError("Cannot start acquisition without providing the configuration")
+    
         status = self.get_acquisition_status()
  
         if status != IntegrationStatus.READY:
