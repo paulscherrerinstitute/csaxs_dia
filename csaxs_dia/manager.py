@@ -73,7 +73,7 @@ class IntegrationManager(object):
             _audit_logger.info("writer_client.stop()")
             try_catch(self.writer_client.stop, "Error while trying to stop the writer.")()
 
-        return check_for_target_status(self.get_acquisition_status, IntegrationStatus.READY)
+        return self.reset()
 
     def get_acquisition_status(self):
         status = validation_eiger9m.interpret_status(self.status_provider.get_quick_status_details())
