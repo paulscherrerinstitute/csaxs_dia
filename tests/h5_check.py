@@ -10,7 +10,10 @@ import matplotlib.pyplot as plt
 # Read H5 file
 
 mypath =sys.argv[1].split("=")[1]
+# gets list of files
 list_of_files = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+# removes anything but h5
+list_of_files = [f for f in list_of_files if (".h5" in f)]
 
 print("Total of %d files will be analyse. Files found under the folder %s: " % (len(list_of_files), mypath))
 for i, name_h5_file in enumerate(list_of_files):
@@ -19,6 +22,7 @@ for i, name_h5_file in enumerate(list_of_files):
 list_of_missing_metadata = []
 need_info = True
 for file_h5_output in list_of_files:
+    print(mypath+file_h5_output)
     f = h5.File(mypath+file_h5_output, "r")
     # Get and print list of datasets within the H5 file
     datasetNames = [n for n in f.keys()]
